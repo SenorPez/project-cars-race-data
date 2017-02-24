@@ -1,6 +1,6 @@
-**********************
+*****************************************
 Project CARS Race Data |Travis| |Codecov|
-**********************
+*****************************************
 
 Processes Project CARS Telemetry Data to create data about races.
 
