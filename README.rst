@@ -1,12 +1,6 @@
 **********************
-Project CARS Race Data
+Project CARS Race Data |Travis| |Codecov|
 **********************
-
- .. image:: https://travis-ci.org/SenorPez/project-cars-race-data.svg?branch=0.1-devel
-    :target: https://travis-ci.org/SenorPez/project-cars-race-data
-
-.. image:: https://codecov.io/gh/SenorPez/project-cars-race-data/branch/0.1-devel/graph/badge.svg
-  :target: https://codecov.io/gh/SenorPez/project-cars-race-data
 
 Processes Project CARS Telemetry Data to create data about races.
 
@@ -28,3 +22,8 @@ Usage
 =====
 The Project CARS Race Data is a python package, and can be imported into your project:  
 ``from racedata import RaceData``
+
+.. |Travis| image:: https://travis-ci.org/SenorPez/project-cars-race-data.svg?branch=0.1-devel
+    :target: https://travis-ci.org/SenorPez/project-cars-race-data
+.. |Codecov| image:: https://codecov.io/gh/SenorPez/project-cars-race-data/branch/0.1-devel/graph/badge.svg
+    :target: https://codecov.io/gh/SenorPez/project-cars-race-data
