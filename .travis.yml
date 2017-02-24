@@ -1,0 +1,20 @@
+language: python
+
+python:
+  - "3.3"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "3.5-dev"
+  - "3.6-dev"
+  - "nightly"
+
+install:
+  - python setup.py install
+  - pip install coverage
+
+script:
+  - nosetests -v --with-coverage --cover-package=racedata
+
+after_success:
+   - bash <(curl -s https://codecov.io/bash)
