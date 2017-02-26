@@ -1087,7 +1087,12 @@ class TestTelemetryDataPacket(unittest.TestCase):
         self.assertListEqual(instance.tyre_is_on_ground, expected_result)
 
     @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
-    def test_property_joypad_buttons(self, _):
+    def test_property_joypad_buttons(self, mock_participant_info):
+        def remove_participant_info_data(*args):
+            for _ in range(9):
+                args[0].popleft()
+        mock_participant_info.side_effect = remove_participant_info_data
+
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_joypad_buttons
         self.assertListEqual(instance.joypad_buttons, expected_result)
