@@ -32,7 +32,15 @@ class Packet:
         self._unpacked_data = self._unpack_data(packet_data)
 
         self.build_version_number = int(self._unpacked_data.popleft())
-        self.packet_type = int(self._unpacked_data.popleft())
+        self._packet_type = int(self._unpacked_data.popleft())
+
+    @property
+    def packet_type(self):
+        return self._packet_type & int('00000011', 2)
+
+    @property
+    def count(self):
+        return (self._packet_type & int('11111100', 2)) >> 2
 
     def _unpack_data(self, packet_data: bytes) -> deque:
         """Unpacks the binary data according to the packet string definition.

@@ -14,6 +14,8 @@ class TestAdditionalParticipantPacket(unittest.TestCase):
     """
     expected_build_version_number = 12345
     expected_packet_type = 2
+    expected_count = 42
+
     expected_offset = 16
     expected_name = [
         "Felipe Nasr",
@@ -47,9 +49,16 @@ class TestAdditionalParticipantPacket(unittest.TestCase):
             test_data.append(cls.expected_build_version_number)
 
         try:
-            test_data.append(kwargs['packet_type'])
+            packet_type = kwargs['packet_type']
         except KeyError:
-            test_data.append(cls.expected_packet_type)
+            packet_type = cls.expected_packet_type
+
+        try:
+            count = kwargs['count']
+        except KeyError:
+            count = cls.expected_count
+
+        test_data.append((count << 2) + packet_type)
 
         try:
             test_data.append(kwargs['offset'])
@@ -76,15 +85,20 @@ class TestAdditionalParticipantPacket(unittest.TestCase):
         with self.assertRaises(error):
             AdditionalParticipantPacket(test_binary_data)
 
+    def test_property_packet_type(self):
+        instance = AdditionalParticipantPacket(self.binary_data())
+        expected_result = self.expected_packet_type
+        self.assertEqual(instance.packet_type, expected_result)
+
+    def test_property_count(self):
+        instance = AdditionalParticipantPacket(self.binary_data())
+        expected_result = self.expected_count
+        self.assertEqual(instance.count, expected_result)
+
     def test_field_build_version_number(self):
         instance = AdditionalParticipantPacket(self.binary_data())
         expected_result = self.expected_build_version_number
         self.assertEqual(instance.build_version_number, expected_result)
-
-    def test_field_packet_type(self):
-        instance = AdditionalParticipantPacket(self.binary_data())
-        expected_result = self.expected_packet_type
-        self.assertEqual(instance.packet_type, expected_result)
 
     def test_field_offset(self):
         instance = AdditionalParticipantPacket(self.binary_data())

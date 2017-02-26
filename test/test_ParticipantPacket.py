@@ -14,6 +14,7 @@ class TestParticipantPacket(unittest.TestCase):
     """
     expected_build_version_number = 12345
     expected_packet_type = 1
+    expected_count = 42
 
     expected_car_name = "F1 W07 Hybrid"
     expected_car_class_name = "F1 2016"
@@ -75,9 +76,16 @@ class TestParticipantPacket(unittest.TestCase):
             test_data.append(cls.expected_build_version_number)
 
         try:
-            test_data.append(kwargs['packet_type'])
+            packet_type = kwargs['packet_type']
         except KeyError:
-            test_data.append(cls.expected_packet_type)
+            packet_type = cls.expected_packet_type
+
+        try:
+            count = kwargs['count']
+        except KeyError:
+            count = cls.expected_count
+
+        test_data.append((count << 2) + packet_type)
 
         try:
             test_data.append(kwargs['car_name'].encode('utf-8'))
@@ -124,6 +132,16 @@ class TestParticipantPacket(unittest.TestCase):
         with self.assertRaises(error):
             ParticipantPacket(test_binary_data)
 
+    def test_property_packet_type(self):
+        instance = ParticipantPacket(self.binary_data())
+        expected_result = self.expected_packet_type
+        self.assertEqual(instance.packet_type, expected_result)
+
+    def test_property_count(self):
+        instance = ParticipantPacket(self.binary_data())
+        expected_result = self.expected_count
+        self.assertEqual(instance.count, expected_result)
+
     def test_field_build_version_number(self):
         instance = ParticipantPacket(self.binary_data())
         expected_result = self.expected_build_version_number
@@ -169,11 +187,6 @@ class TestParticipantPacket(unittest.TestCase):
             name=[name+'\x00Garbage Data' for name in self.expected_name]))
         expected_result = self.expected_name
         self.assertListEqual(instance.name, expected_result)
-
-    def test_field_packet_type(self):
-        instance = ParticipantPacket(self.binary_data())
-        expected_result = self.expected_packet_type
-        self.assertEqual(instance.packet_type, expected_result)
 
     def test_field_track_location(self):
         instance = ParticipantPacket(self.binary_data())

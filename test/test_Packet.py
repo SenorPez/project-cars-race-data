@@ -13,7 +13,8 @@ class TestPacket(unittest.TestCase):
     
     """
     expected_build_version_number = 12345
-    expected_packet_type = 42
+    expected_packet_type = 3
+    expected_count = 42
     
     @classmethod
     def binary_data(cls, **kwargs):
@@ -26,9 +27,16 @@ class TestPacket(unittest.TestCase):
             test_data.append(cls.expected_build_version_number)
             
         try:
-            test_data.append(kwargs['packet_type'])
+            packet_type = kwargs['packet_type']
         except KeyError:
-            test_data.append(cls.expected_packet_type)
+            packet_type = cls.expected_packet_type
+
+        try:
+            count = kwargs['count']
+        except KeyError:
+            count = cls.expected_count
+
+        test_data.append((count << 2) + packet_type)
             
         return pack(packet_string, *test_data)
     
@@ -43,16 +51,21 @@ class TestPacket(unittest.TestCase):
         from struct import error
         with self.assertRaises(error):
             Packet(test_binary_data)
+
+    def test_property_packet_type(self):
+        instance = Packet(self.binary_data())
+        expected_result = self.expected_packet_type
+        self.assertEqual(instance.packet_type, expected_result)
+
+    def test_property_count(self):
+        instance = Packet(self.binary_data())
+        expected_result = self.expected_count
+        self.assertEqual(instance.count, expected_result)
             
     def test_field_build_version_number(self):
         instance = Packet(self.binary_data())
         expected_result = self.expected_build_version_number
         self.assertEqual(instance.build_version_number, expected_result)
-
-    def test_field_packet_type(self):
-        instance = Packet(self.binary_data())
-        expected_result = self.expected_packet_type
-        self.assertEqual(instance.packet_type, expected_result)
 
     def test_magic_eq(self):
         instance_1 = Packet(self.binary_data())
