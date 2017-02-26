@@ -922,13 +922,13 @@ class TestTelemetryDataPacket(unittest.TestCase):
 
         return pack(packet_string, *test_data)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_init(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = TelemetryDataPacket
         self.assertIsInstance(instance, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_init_wrong_packet_length(self, _):
         test_binary_data = pack("H", 42)
 
@@ -936,223 +936,223 @@ class TestTelemetryDataPacket(unittest.TestCase):
         with self.assertRaises(error):
             TelemetryDataPacket(test_binary_data)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_packet_type(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_packet_type
         self.assertEqual(instance.packet_type, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_count(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_count
         self.assertEqual(instance.count, expected_result)
             
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_game_state(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_game_state
         self.assertEqual(instance.game_state, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_session_state(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_session_state
         self.assertEqual(instance.session_state, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_race_state(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_race_state
         self.assertEqual(instance.race_state, expected_result)
    
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_lap_invalidated(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_lap_invalidated
         self.assertEqual(instance.lap_invalidated, expected_result)
    
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_anti_lock_active(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_anti_lock
         self.assertEqual(instance.anti_lock_active, expected_result)
    
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_boost_active(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_boost
         self.assertEqual(instance.boost_active, expected_result)
    
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_highest_flag_color(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_highest_flag_color
         self.assertEqual(instance.highest_flag_color, expected_result)
    
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_highest_flag_reason(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_highest_flag_reason
         self.assertEqual(instance.highest_flag_reason, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_pit_mode(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_pit_mode
         self.assertEqual(instance.pit_mode, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_pit_schedule(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_pit_schedule
         self.assertEqual(instance.pit_schedule, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_car_headlight(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_car_headlight
         self.assertEqual(instance.car_headlight, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_car_engine_active(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_car_engine_active
         self.assertEqual(instance.car_engine_active, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_car_engine_warning(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_car_engine_warning
         self.assertEqual(instance.car_engine_warning, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_car_speed_limiter(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_car_speed_limiter
         self.assertEqual(instance.car_speed_limiter, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_car_abs(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_car_abs
         self.assertEqual(instance.car_abs, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_car_handbrake(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_car_handbrake
         self.assertEqual(instance.car_handbrake, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_car_stability(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_car_stability
         self.assertEqual(instance.car_stability, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_car_traction_control(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_car_traction_control
         self.assertEqual(instance.car_traction_control, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_gear(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_gear
         self.assertEqual(instance.gear, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_num_gears(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_num_gears
         self.assertEqual(instance.num_gears, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_tyre_attached(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_tyre_attached
         self.assertListEqual(instance.tyre_attached, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_tyre_inflated(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_tyre_inflated
         self.assertListEqual(instance.tyre_inflated, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_tyre_is_on_ground(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_tyre_is_on_ground
         self.assertListEqual(instance.tyre_is_on_ground, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_joypad_buttons(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_joypad_buttons
         self.assertListEqual(instance.joypad_buttons, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_property_crash_state(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_crash_state
         self.assertEqual(instance.crash_state, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_build_version_number(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_build_version_number
         self.assertEqual(instance.build_version_number, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_viewed_participant_index(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_viewed_participant_index
         self.assertEqual(instance.viewed_participant_index, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_num_participants(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_num_participants
         self.assertEqual(instance.num_participants, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_unfiltered_throttle(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_unfiltered_throttle
         self.assertEqual(instance.unfiltered_throttle, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_unfiltered_brake(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_unfiltered_brake
         self.assertEqual(instance.unfiltered_brake, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_unfiltered_steering(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_unfiltered_steering
         self.assertEqual(instance.unfiltered_steering, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_unfiltered_clutch(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_unfiltered_clutch
         self.assertEqual(instance.unfiltered_clutch, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_laps_in_event(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_laps_in_event
         self.assertEqual(instance.laps_in_event, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_best_lap_time(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_best_lap_time
         self.assertAlmostEqual(instance.best_lap_time, expected_result, 4)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_last_lap_time(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_last_lap_time
@@ -1161,7 +1161,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_current_time(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_current_time
@@ -1170,7 +1170,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_split_time_ahead(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_split_time_ahead
@@ -1179,7 +1179,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_split_time_behind(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_split_time_behind
@@ -1188,7 +1188,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_split_time(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_split_time
@@ -1197,7 +1197,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_event_time_remaining(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_event_time_remaining
@@ -1206,7 +1206,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_personal_fastest_lap_time(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_personal_fastest_lap_time
@@ -1215,7 +1215,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_world_fastest_lap_time(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_world_fastest_lap_time
@@ -1224,7 +1224,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_current_s1_time(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_current_s1_time
@@ -1233,7 +1233,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_current_s2_time(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_current_s2_time
@@ -1242,7 +1242,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_current_s3_time(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_current_s3_time
@@ -1251,7 +1251,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_fastest_s1_time(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_fastest_s1_time
@@ -1260,7 +1260,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_fastest_s2_time(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_fastest_s2_time
@@ -1269,7 +1269,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_fastest_s3_time(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_fastest_s3_time
@@ -1278,7 +1278,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_personal_fastest_s1_time(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_personal_fastest_s1_time
@@ -1287,7 +1287,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_personal_fastest_s2_time(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_personal_fastest_s2_time
@@ -1296,7 +1296,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_personal_fastest_s3_time(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_personal_fastest_s3_time
@@ -1305,7 +1305,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_world_fastest_s1_time(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_world_fastest_s1_time
@@ -1314,7 +1314,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_world_fastest_s2_time(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_world_fastest_s2_time
@@ -1323,7 +1323,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_world_fastest_s3_time(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_world_fastest_s3_time
@@ -1332,67 +1332,67 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_oil_temp(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_oil_temp
         self.assertEqual(instance.oil_temp, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_oil_pressure(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_oil_pressure
         self.assertEqual(instance.oil_pressure, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_water_temp(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_water_temp
         self.assertEqual(instance.water_temp, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_water_pressure(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_water_pressure
         self.assertEqual(instance.water_pressure, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_fuel_pressure(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_fuel_pressure
         self.assertEqual(instance.fuel_pressure, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_fuel_capacity(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_fuel_capacity
         self.assertEqual(instance.fuel_capacity, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_brake(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_brake
         self.assertEqual(instance.brake, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_throttle(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_throttle
         self.assertEqual(instance.throttle, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_clutch(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_clutch
         self.assertEqual(instance.clutch, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_steering(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_steering
         self.assertEqual(instance.steering, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_fuel_level(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_fuel_level
@@ -1401,43 +1401,43 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_speed(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_speed
         self.assertAlmostEqual(instance.speed, expected_result, delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_rpm(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_rpm
         self.assertEqual(instance.rpm, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_max_rpm(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_max_rpm
         self.assertEqual(instance.max_rpm, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_boost_amount(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_boost_amount
         self.assertEqual(instance.boost_amount, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_enforced_pit_stop_lap(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_enforced_pit_stop_lap
         self.assertEqual(instance.enforced_pit_stop_lap, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_odometer(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_odometer
         self.assertAlmostEqual(instance.odometer, expected_result, delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_orientation(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_orientation
@@ -1446,7 +1446,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_local_velocity(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_local_velocity
@@ -1455,7 +1455,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_world_velocity(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_world_velocity
@@ -1464,7 +1464,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_angular_velocity(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_angular_velocity
@@ -1473,7 +1473,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_local_acceleration(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_local_acceleration
@@ -1482,7 +1482,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_world_acceleration(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_world_acceleration
@@ -1491,7 +1491,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_extents_centre(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_extents_centre
@@ -1500,13 +1500,13 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_terrain(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_terrain
         self.assertListEqual(instance.terrain, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_tyre_y(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_tyre_y
@@ -1515,7 +1515,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_tyre_rps(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_tyre_rps
@@ -1524,7 +1524,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_tyre_slip_speed(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_tyre_slip_speed
@@ -1533,19 +1533,19 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_tyre_temp(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_tyre_temp
         self.assertListEqual(instance.tyre_temp, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_tyre_grip(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_tyre_grip
         self.assertListEqual(instance.tyre_grip, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_tyre_height_above_ground(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_tyre_height_above_ground
@@ -1554,7 +1554,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_tyre_lateral_stiffness(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_tyre_lateral_stiffness
@@ -1563,61 +1563,61 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_tyre_wear(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_tyre_wear
         self.assertListEqual(instance.tyre_wear, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_brake_damage(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_brake_damage
         self.assertListEqual(instance.brake_damage, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_suspension_damage(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_suspension_damage
         self.assertListEqual(instance.suspension_damage, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_brake_temp(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_brake_temp
         self.assertListEqual(instance.brake_temp, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_tyre_tread_temp(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_tyre_tread_temp
         self.assertListEqual(instance.tyre_tread_temp, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_tyre_layer_temp(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_tyre_layer_temp
         self.assertListEqual(instance.tyre_layer_temp, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_tyre_carcass_temp(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_tyre_carcass_temp
         self.assertListEqual(instance.tyre_carcass_temp, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_tyre_rim_temp(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_tyre_rim_temp
         self.assertListEqual(instance.tyre_rim_temp, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_tyre_internal_air_temp(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_tyre_internal_air_temp
         self.assertListEqual(instance.tyre_internal_air_temp, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_wheel_local_position_y(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_wheel_local_position_y
@@ -1626,7 +1626,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_ride_height(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_ride_height
@@ -1635,7 +1635,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_suspension_travel(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_suspension_travel
@@ -1644,7 +1644,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_suspension_velocity(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_suspension_velocity
@@ -1653,13 +1653,13 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_air_pressure(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_air_pressure
         self.assertListEqual(instance.air_pressure, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_engine_speed(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_engine_speed
@@ -1668,7 +1668,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_engine_torque(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_engine_torque
@@ -1677,61 +1677,61 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_aero_damage(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_aero_damage
         self.assertEqual(instance.aero_damage, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_engine_damage(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_engine_damage
         self.assertEqual(instance.engine_damage, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_ambient_temperature(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_ambient_temperature
         self.assertEqual(instance.ambient_temperature, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_track_temperature(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_track_temperature
         self.assertEqual(instance.track_temperature, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_rain_density(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_rain_density
         self.assertEqual(instance.rain_density, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_wind_speed(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_wind_speed
         self.assertEqual(instance.wind_speed, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_wind_direction_x(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_wind_direction_x
         self.assertEqual(instance.wind_direction_x, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_wind_direction_y(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = self.expected_wind_direction_y
         self.assertEqual(instance.wind_direction_y, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_participant_info(self, _):
         instance = TelemetryDataPacket(self.binary_data())
         expected_result = list
         self.assertIsInstance(instance.participant_info, expected_result)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_track_length(self, mock_participant_info):
         def remove_participant_info_data(*args):
             for _ in range(9):
@@ -1745,7 +1745,7 @@ class TestTelemetryDataPacket(unittest.TestCase):
             expected_result,
             delta=0.001)
 
-    @patch('replayenhancer.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
     def test_field_wings(self, mock_participant_info):
         def remove_participant_info_data(*args):
             for _ in range(9):
