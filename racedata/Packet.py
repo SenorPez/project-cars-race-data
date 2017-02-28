@@ -3,16 +3,15 @@ Provides a base class for packets output by Project CARS.
 """
 
 from collections import deque
-from struct import unpack
+from struct import calcsize, unpack
 
 
-class Packet:
+class Packet(object):
     """Base class representing a packet output by Project CARS.
 
-    This class should probably never be called directly; Project CARS does not
-    ever output packets that will match the format required of this class.
-    Instead, AdditionalParticipantPacket, ParticipantPacket, and
-    TelemetryDataPacket should be used.
+    Instantiating a new Packet class returns an object of the appropriate
+    subclass, as determined by the length of the binary data string passed to
+    the constructor. If no appropriate subclass exists, a ValueError is raised.
     """
     _packet_string = "HB"
 
@@ -23,10 +22,6 @@ class Packet:
             packet_data: Packed binary data captured from the Project CARS UDP
                 broadcast. Though not really; the subclasses should be called
                 instead.
-
-        Raises:
-            struct.error: Raised if an error occurs while unpacking the binary
-                data.
         """
         self._hash = hash(packet_data)
         self._unpacked_data = self._unpack_data(packet_data)
@@ -51,11 +46,18 @@ class Packet:
         """
         return deque(unpack(self._packet_string, packet_data))
 
+    def __new__(cls, packet_data):
+        for subclass in cls.__subclasses__():
+            if len(packet_data) == calcsize(subclass._packet_string):
+                return object.__new__(subclass)
+
+        raise ValueError
+
     def __repr__(self):
         return self.__str__()
 
     def __str__(self):
-        return "Packet"
+        raise NotImplementedError
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):

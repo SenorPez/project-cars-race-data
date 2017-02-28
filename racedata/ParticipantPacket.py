@@ -15,7 +15,7 @@ class ParticipantPacket(Packet):
     1.
     """
 
-    _packet_string = "HB64s64s64s64s"
+    _packet_string = "=HB64s64s64s64s"
     _packet_string += "64s" * 16
     _packet_string += "16f"
 
@@ -52,6 +52,9 @@ class ParticipantPacket(Packet):
 
         self.fastest_lap_time = [
             float(self._unpacked_data.popleft()) for _ in range(16)]
+
+    def __new__(cls, packet_data):
+        raise NotImplementedError
 
     def __str__(self):
         return "ParticipantPacket"

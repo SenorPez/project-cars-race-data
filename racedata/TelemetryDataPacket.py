@@ -13,7 +13,7 @@ class TelemetryDataPacket(Packet):
     The telemetry data packets have a length of 1367 and is packet type 0.
     """
 
-    _packet_string = "HB"
+    _packet_string = "=HB"
     _packet_string += "B"
     _packet_string += "bb"
     _packet_string += "BBbBB"
@@ -496,6 +496,9 @@ class TelemetryDataPacket(Packet):
         CRASH_DAMAGE_ROLLING = 4
         """
         return self._crash_state & int('00001111', 2)
+
+    def __new__(cls, packet_data):
+        raise NotImplementedError
 
     def __str__(self):
         return "TelemetryDataPacket"

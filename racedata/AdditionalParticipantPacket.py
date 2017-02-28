@@ -16,7 +16,7 @@ class AdditionalParticipantPacket(Packet):
     and is packet type 2.
     """
 
-    _packet_string = "HBB"
+    _packet_string = "=HBB"
     _packet_string += "64s" * 16
 
     def __init__(self, packet_data: bytes):
@@ -34,6 +34,9 @@ class AdditionalParticipantPacket(Packet):
             self._unpacked_data.popleft(),
             encoding='utf-8',
             errors='strict').split('\x00', 1)[0] for _ in range(16)]
+
+    def __new__(cls, packet_data):
+        raise NotImplementedError
 
     def __str__(self):
         return "AdditionalParticipantPacket"

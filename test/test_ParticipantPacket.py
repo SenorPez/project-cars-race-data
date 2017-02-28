@@ -6,6 +6,7 @@ import unittest
 from struct import pack
 
 from racedata.ParticipantPacket import ParticipantPacket
+from racedata.Packet import Packet
 
 
 class TestParticipantPacket(unittest.TestCase):
@@ -66,7 +67,7 @@ class TestParticipantPacket(unittest.TestCase):
     @classmethod
     def binary_data(cls, **kwargs):
         test_data = list()
-        packet_string = "HB64s64s64s64s"
+        packet_string = "=HB64s64s64s64s"
         packet_string += "64s" * 16
         packet_string += "16f"
 
@@ -121,56 +122,60 @@ class TestParticipantPacket(unittest.TestCase):
         return pack(packet_string, *test_data)
 
     def test_init(self):
-        instance = ParticipantPacket(self.binary_data())
+        instance = Packet(self.binary_data())
         expected_result = ParticipantPacket
         self.assertIsInstance(instance, expected_result)
+
+    def test_direct_init(self):
+        with self.assertRaises(NotImplementedError):
+            ParticipantPacket(self.binary_data())
 
     def test_init_wrong_packet_length(self):
         test_binary_data = pack("H", 42)
 
         from struct import error
-        with self.assertRaises(error):
-            ParticipantPacket(test_binary_data)
+        with self.assertRaises(ValueError):
+            Packet(test_binary_data)
 
     def test_property_packet_type(self):
-        instance = ParticipantPacket(self.binary_data())
+        instance = Packet(self.binary_data())
         expected_result = self.expected_packet_type
         self.assertEqual(instance.packet_type, expected_result)
 
     def test_property_count(self):
-        instance = ParticipantPacket(self.binary_data())
+        instance = Packet(self.binary_data())
         expected_result = self.expected_count
         self.assertEqual(instance.count, expected_result)
 
     def test_field_build_version_number(self):
-        instance = ParticipantPacket(self.binary_data())
+        instance = Packet(self.binary_data())
         expected_result = self.expected_build_version_number
         self.assertEqual(instance.build_version_number, expected_result)
 
     def test_field_car_class_name(self):
-        instance = ParticipantPacket(self.binary_data())
+        instance = Packet(self.binary_data())
         expected_result = self.expected_car_class_name
         self.assertEqual(instance.car_class_name, expected_result)
 
     def test_field_car_class_name_split_on_null(self):
-        instance = ParticipantPacket(self.binary_data(
+        instance = Packet(self.binary_data(
             car_class_name=self.expected_car_class_name + "\x00Garbage Data"))
         expected_result = self.expected_car_class_name
         self.assertEqual(instance.car_class_name, expected_result)
 
     def test_field_car_name(self):
-        instance = ParticipantPacket(self.binary_data())
+        instance = Packet(self.binary_data())
         expected_result = self.expected_car_name
         self.assertEqual(instance.car_name, expected_result)
 
     def test_field_car_name_split_on_null(self):
-        instance = ParticipantPacket(self.binary_data(
+        instance = Packet(self.binary_data(
             car_class_name=self.expected_car_name + "\x00Garbage Data"))
         expected_result = self.expected_car_name
         self.assertEqual(instance.car_name, expected_result)
         
     def test_field_fastest_lap(self):
-        instance = ParticipantPacket(self.binary_data())
+        instance = Packet(self.binary_data())
         expected_result = self.expected_fastest_lap
         self.assertListAlmostEqual(
             instance.fastest_lap_time,
@@ -178,68 +183,68 @@ class TestParticipantPacket(unittest.TestCase):
             delta=0.001)
 
     def test_field_name(self):
-        instance = ParticipantPacket(self.binary_data())
+        instance = Packet(self.binary_data())
         expected_result = self.expected_name
         self.assertListEqual(instance.name, expected_result)
 
     def test_field_name_split_on_null(self):
-        instance = ParticipantPacket(self.binary_data(
+        instance = Packet(self.binary_data(
             name=[name+'\x00Garbage Data' for name in self.expected_name]))
         expected_result = self.expected_name
         self.assertListEqual(instance.name, expected_result)
 
     def test_field_track_location(self):
-        instance = ParticipantPacket(self.binary_data())
+        instance = Packet(self.binary_data())
         expected_result = self.expected_track_location
         self.assertEqual(instance.track_location, expected_result)
 
     def test_field_track_location_split_on_null(self):
-        instance = ParticipantPacket(self.binary_data(
+        instance = Packet(self.binary_data(
             track_location=self.expected_track_location + "\x00Garbage Data"))
         expected_result = self.expected_track_location
         self.assertEqual(instance.track_location, expected_result)
 
     def test_field_track_variation(self):
-        instance = ParticipantPacket(self.binary_data())
+        instance = Packet(self.binary_data())
         expected_result = self.expected_track_variation
         self.assertEqual(instance.track_variation, expected_result)
 
     def test_field_track_variation_split_on_null(self):
-        instance = ParticipantPacket(self.binary_data(
+        instance = Packet(self.binary_data(
             track_variation=self.expected_track_variation + "\x00Garbage Data"))
         expected_result = self.expected_track_variation
         self.assertEqual(instance.track_variation, expected_result)
 
     def test_magic_eq(self):
-        instance_1 = ParticipantPacket(self.binary_data())
-        instance_2 = ParticipantPacket(self.binary_data())
+        instance_1 = Packet(self.binary_data())
+        instance_2 = Packet(self.binary_data())
         self.assertTrue(instance_1 == instance_2)
 
     def test_magic_eq_diff_class(self):
-        instance = ParticipantPacket(self.binary_data())
+        instance = Packet(self.binary_data())
         self.assertFalse(instance == self)
 
     def test_magic_hash(self):
-        instance = ParticipantPacket(self.binary_data())
+        instance = Packet(self.binary_data())
         expected_result = hash(self.binary_data())
         self.assertEqual(hash(instance), expected_result)
 
     def test_magic_ne(self):
-        instance_1 = ParticipantPacket(self.binary_data())
-        instance_2 = ParticipantPacket(self.binary_data(
+        instance_1 = Packet(self.binary_data())
+        instance_2 = Packet(self.binary_data(
             car_name='125cc Shifter Kart'))
         self.assertTrue(instance_1 != instance_2)
 
     def test_magic_ne_diff_class(self):
-        instance = ParticipantPacket(self.binary_data())
+        instance = Packet(self.binary_data())
         self.assertTrue(instance != self)
 
     def test_magic_repr(self):
-        instance = ParticipantPacket(self.binary_data())
+        instance = Packet(self.binary_data())
         expected_result = "ParticipantPacket"
         self.assertEqual(repr(instance), expected_result)
 
     def test_magic_str(self):
-        instance = ParticipantPacket(self.binary_data())
+        instance = Packet(self.binary_data())
         expected_result = "ParticipantPacket"
         self.assertEqual(str(instance), expected_result)
