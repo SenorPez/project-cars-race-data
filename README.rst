@@ -12,7 +12,7 @@ The Project CARS Race Data (PCRD) is a Python package intended to process Projec
 
 Requirements
 ============
-- `Python 3.3 <https://www.python.org/download/releases/3.3.0/>`_ or greater
+- `Python 3.5 <https://www.python.org/downloads/>`_ or greater
 
 Installation
 ============
