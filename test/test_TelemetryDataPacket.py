@@ -3,7 +3,8 @@ Tests for TelemetryDataPacket.py
 """
 import unittest
 from collections import deque
-from random import uniform, randrange
+from hashlib import md5
+from random import randrange, uniform
 from struct import pack
 from unittest.mock import patch
 
@@ -1777,7 +1778,8 @@ class TestTelemetryDataPacket(unittest.TestCase):
 
     def test_magic_hash(self):
         instance = Packet(self.binary_data())
-        expected_result = hash(self.binary_data())
+        expected_result = int(
+            md5(self.binary_data()).hexdigest(), 16) & 0xfffffffffffffff
         self.assertEqual(hash(instance), expected_result)
 
     def test_magic_ne(self):

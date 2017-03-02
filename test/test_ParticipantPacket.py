@@ -3,10 +3,11 @@ Tests for ParticipantPacket.py
 """
 
 import unittest
+from hashlib import md5
 from struct import pack
 
-from racedata.ParticipantPacket import ParticipantPacket
 from racedata.Packet import Packet
+from racedata.ParticipantPacket import ParticipantPacket
 
 
 class TestParticipantPacket(unittest.TestCase):
@@ -133,7 +134,6 @@ class TestParticipantPacket(unittest.TestCase):
     def test_init_wrong_packet_length(self):
         test_binary_data = pack("H", 42)
 
-        from struct import error
         with self.assertRaises(ValueError):
             Packet(test_binary_data)
 
@@ -226,7 +226,8 @@ class TestParticipantPacket(unittest.TestCase):
 
     def test_magic_hash(self):
         instance = Packet(self.binary_data())
-        expected_result = hash(self.binary_data())
+        expected_result = int(
+            md5(self.binary_data()).hexdigest(), 16) & 0xfffffffffffffff
         self.assertEqual(hash(instance), expected_result)
 
     def test_magic_ne(self):

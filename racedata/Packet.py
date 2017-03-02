@@ -1,8 +1,8 @@
 """
 Provides a base class for packets output by Project CARS.
 """
-
 from collections import deque
+from hashlib import md5
 from struct import calcsize, unpack
 
 
@@ -23,7 +23,7 @@ class Packet(object):
                 broadcast. Though not really; the subclasses should be called
                 instead.
         """
-        self._hash = hash(packet_data)
+        self._hash = int(md5(packet_data).hexdigest(), 16) & 0xfffffffffffffff
         self._unpacked_data = self._unpack_data(packet_data)
 
         self.build_version_number = int(self._unpacked_data.popleft())

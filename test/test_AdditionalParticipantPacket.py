@@ -4,6 +4,7 @@ Tests for AdditionalParticipantPacket.py
 
 import unittest
 from struct import pack
+from hashlib import md5
 
 from racedata.AdditionalParticipantPacket import AdditionalParticipantPacket
 from racedata.Packet import Packet
@@ -131,7 +132,8 @@ class TestAdditionalParticipantPacket(unittest.TestCase):
 
     def test_magic_hash(self):
         instance = Packet(self.binary_data())
-        expected_result = hash(self.binary_data())
+        expected_result = int(
+            md5(self.binary_data()).hexdigest(), 16) & 0xfffffffffffffff
         self.assertEqual(hash(instance), expected_result)
 
     def test_magic_ne(self):
