@@ -180,7 +180,7 @@ class RaceData:
     @staticmethod
     def _to_hash(telemetry_data, hash_value):
         progress = tqdm(
-            desc='Readying Telemetry Data',
+            desc='Preparing Telemetry Data',
             total=telemetry_data.packet_count,
             unit='packets')
 

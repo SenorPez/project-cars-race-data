@@ -3,6 +3,7 @@ Tests for RaceData.py
 """
 import unittest
 from inspect import isgenerator
+from unittest import mock
 from unittest.mock import MagicMock, mock_open, patch, sentinel
 
 from racedata.RaceData import RaceData, TelemetryData
@@ -25,6 +26,292 @@ class TestRaceData(unittest.TestCase):
 
         m = mock_open()
         with patch('racedata.RaceData.open', m):
+            instance = RaceData(sentinel.directory)
+
+        expected_result = RaceData
+        self.assertIsInstance(instance, expected_result)
+
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.TelemetryData')
+    def test_init_no_descriptor_happy_path(self, mock_telemetry_data, *_):
+        """
+        Three packets: Race Start, Race Finish, Race End.
+        Nothing spurious.
+        """
+        mock_race_end_packet = MagicMock()
+        mock_race_end_packet.packet_type = 0
+        mock_race_end_packet.race_state = 3
+
+        mock_race_finish_packet = MagicMock()
+        mock_race_finish_packet.packet_type = 0
+        mock_race_finish_packet.race_state = 2
+
+        mock_race_start_packet = MagicMock()
+        mock_race_start_packet.packet_type = 0
+        mock_race_start_packet.race_state = 1
+        mock_race_start_packet.session_state = 5
+
+        mock_data_1 = MagicMock()
+        mock_data_1.packet_count = 3
+        mock_data_1.__next__.side_effect = [
+            mock_race_start_packet,
+            mock_race_finish_packet,
+            mock_race_end_packet]
+
+        mock_data_2 = MagicMock()
+        mock_data_2.packet_count = 3
+        mock_data_2.__next__.side_effect = [
+            mock_race_start_packet,
+            mock_race_finish_packet,
+            mock_race_end_packet]
+
+        mock_data_3 = MagicMock()
+        mock_data_3.packet_count = 3
+        mock_data_3.__next__.side_effect = [
+            mock_race_end_packet,
+            mock_race_finish_packet,
+            mock_race_start_packet]
+
+        mock_data_4 = MagicMock()
+        mock_data_4.packet_count = 3
+        mock_data_4.__next__.side_effect = [
+            mock_race_start_packet,
+            mock_race_finish_packet,
+            mock_race_end_packet]
+
+        mock_telemetry_data.side_effect = [
+            mock_data_1,
+            mock_data_2,
+            mock_data_3,
+            mock_data_4]
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            m.side_effect = [FileNotFoundError, mock.DEFAULT]
+            instance = RaceData(sentinel.directory)
+
+        expected_result = RaceData
+        self.assertIsInstance(instance, expected_result)
+
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.TelemetryData')
+    def test_init_no_descriptor_extra_end_packet(self, mock_telemetry_data, *_):
+        """
+        Extra garbage packet at the end.
+        """
+        mock_extra_packet = MagicMock()
+        mock_extra_packet.packet_type = 0
+        mock_extra_packet.race_state = 2
+
+        mock_race_end_packet = MagicMock()
+        mock_race_end_packet.packet_type = 0
+        mock_race_end_packet.race_state = 3
+
+        mock_race_finish_packet = MagicMock()
+        mock_race_finish_packet.packet_type = 0
+        mock_race_finish_packet.race_state = 2
+
+        mock_race_start_packet = MagicMock()
+        mock_race_start_packet.packet_type = 0
+        mock_race_start_packet.race_state = 1
+        mock_race_start_packet.session_state = 5
+
+        mock_data_1 = MagicMock()
+        mock_data_1.packet_count = 3
+        mock_data_1.__next__.side_effect = [
+            mock_race_start_packet,
+            mock_race_finish_packet,
+            mock_race_end_packet,
+            mock_extra_packet]
+
+        mock_data_2 = MagicMock()
+        mock_data_2.packet_count = 3
+        mock_data_2.__next__.side_effect = [
+            mock_race_start_packet,
+            mock_race_finish_packet,
+            mock_race_end_packet,
+            mock_extra_packet]
+
+        mock_data_3 = MagicMock()
+        mock_data_3.packet_count = 3
+        mock_data_3.__next__.side_effect = [
+            mock_extra_packet,
+            mock_race_end_packet,
+            mock_race_finish_packet,
+            mock_race_start_packet]
+
+        mock_data_4 = MagicMock()
+        mock_data_4.packet_count = 3
+        mock_data_4.__next__.side_effect = [
+            mock_race_start_packet,
+            mock_race_finish_packet,
+            mock_race_end_packet,
+            mock_extra_packet]
+
+        mock_telemetry_data.side_effect = [
+            mock_data_1,
+            mock_data_2,
+            mock_data_3,
+            mock_data_4]
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            m.side_effect = [FileNotFoundError, mock.DEFAULT]
+            instance = RaceData(sentinel.directory)
+
+        expected_result = RaceData
+        self.assertIsInstance(instance, expected_result)
+
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.TelemetryData')
+    def test_init_no_descriptor_extra_start_packet(
+            self,
+            mock_telemetry_data,
+            *_):
+        """
+        Extra garbage packet at the start.
+        """
+        mock_extra_packet = MagicMock()
+        mock_extra_packet.packet_type = 0
+        mock_extra_packet.session_state = 4
+
+        mock_race_end_packet = MagicMock()
+        mock_race_end_packet.packet_type = 0
+        mock_race_end_packet.race_state = 3
+
+        mock_race_finish_packet = MagicMock()
+        mock_race_finish_packet.packet_type = 0
+        mock_race_finish_packet.race_state = 2
+
+        mock_race_start_packet = MagicMock()
+        mock_race_start_packet.packet_type = 0
+        mock_race_start_packet.race_state = 1
+        mock_race_start_packet.session_state = 5
+
+        mock_data_1 = MagicMock()
+        mock_data_1.packet_count = 3
+        mock_data_1.__next__.side_effect = [
+            mock_extra_packet,
+            mock_race_start_packet,
+            mock_race_finish_packet,
+            mock_race_end_packet]
+
+        mock_data_2 = MagicMock()
+        mock_data_2.packet_count = 3
+        mock_data_2.__next__.side_effect = [
+            mock_extra_packet,
+            mock_race_start_packet,
+            mock_race_finish_packet,
+            mock_race_end_packet]
+
+        mock_data_3 = MagicMock()
+        mock_data_3.packet_count = 3
+        mock_data_3.__next__.side_effect = [
+            mock_race_end_packet,
+            mock_race_finish_packet,
+            mock_race_start_packet,
+            mock_extra_packet]
+
+        mock_data_4 = MagicMock()
+        mock_data_4.packet_count = 3
+        mock_data_4.__next__.side_effect = [
+            mock_extra_packet,
+            mock_race_start_packet,
+            mock_race_finish_packet,
+            mock_race_end_packet]
+
+        mock_telemetry_data.side_effect = [
+            mock_data_1,
+            mock_data_2,
+            mock_data_3,
+            mock_data_4]
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            m.side_effect = [FileNotFoundError, mock.DEFAULT]
+            instance = RaceData(sentinel.directory)
+
+        expected_result = RaceData
+        self.assertIsInstance(instance, expected_result)
+
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.TelemetryData')
+    def test_init_no_descriptor_unpopulated(self, mock_telemetry_data, *_):
+        """
+        Start packet without driver population.
+        """
+        mock_race_end_packet = MagicMock()
+        mock_race_end_packet.packet_type = 0
+        mock_race_end_packet.race_state = 3
+
+        mock_race_finish_packet = MagicMock()
+        mock_race_finish_packet.packet_type = 0
+        mock_race_finish_packet.race_state = 2
+
+        mock_race_start_packet = MagicMock()
+        mock_race_start_packet.packet_type = 0
+        mock_race_start_packet.race_state = 1
+        mock_race_start_packet.session_state = 5
+        mock_race_start_packet.game_state = 2
+
+        mock_unpopulated_packet = MagicMock()
+        mock_unpopulated_packet.packet_type = 0
+        mock_unpopulated_packet.race_state = 1
+        mock_unpopulated_packet.session_state = 5
+        mock_unpopulated_packet.game_state = 2
+        mock_unpopulated_packet.num_participants = 1
+
+        mock_participant = MagicMock()
+        mock_participant.race_position = 0
+        mock_participant.sector = 0
+
+        mock_unpopulated_packet.participant_info = [mock_participant]
+
+        mock_data_1 = MagicMock()
+        mock_data_1.packet_count = 3
+        mock_data_1.__next__.side_effect = [
+            mock_unpopulated_packet,
+            mock_race_start_packet,
+            mock_race_finish_packet,
+            mock_race_end_packet]
+
+        mock_data_2 = MagicMock()
+        mock_data_2.packet_count = 3
+        mock_data_2.__next__.side_effect = [
+            mock_unpopulated_packet,
+            mock_race_start_packet,
+            mock_race_finish_packet,
+            mock_race_end_packet]
+
+        mock_data_3 = MagicMock()
+        mock_data_3.packet_count = 3
+        mock_data_3.__next__.side_effect = [
+            mock_race_end_packet,
+            mock_race_finish_packet,
+            mock_race_start_packet,
+            mock_unpopulated_packet]
+
+        mock_data_4 = MagicMock()
+        mock_data_4.packet_count = 3
+        mock_data_4.__next__.side_effect = [
+            mock_unpopulated_packet,
+            mock_race_start_packet,
+            mock_race_finish_packet,
+            mock_race_end_packet]
+
+        mock_telemetry_data.side_effect = [
+            mock_data_1,
+            mock_data_2,
+            mock_data_3,
+            mock_data_4]
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            m.side_effect = [FileNotFoundError, mock.DEFAULT]
             instance = RaceData(sentinel.directory)
 
         expected_result = RaceData
@@ -356,7 +643,7 @@ class TestTelemetryData(unittest.TestCase):
         expected_result = mock_packet.__class__
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m) as mock_file_open:
+        with patch('racedata.RaceData.open', m):
             self.assertIsInstance(next(instance), expected_result)
 
         m.assert_called_once_with(mock_packet, 'rb')
