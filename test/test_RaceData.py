@@ -3,23 +3,214 @@ Tests for RaceData.py
 """
 import unittest
 from inspect import isgenerator
-from unittest.mock import mock_open, patch, sentinel
+from unittest.mock import MagicMock, mock_open, patch, sentinel
 
 from racedata.RaceData import RaceData, TelemetryData
 
 
-@unittest.skip("Because I'm a retard.")
 class TestRaceData(unittest.TestCase):
     """Unit tests for RaceData class.
 
     """
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.TelemetryData')
-    def test_init(self, mock_telemetry_data):
-        mock_telemetry_data.return_value = sentinel.telemetry_data
+    def test_init(self, mock_telemetry_data, _, mock_json):
+        mock_data = MagicMock()
+        mock_data.packet_count = 1
+        mock_data.__next__.return_value = sentinel.packet
+        mock_telemetry_data.return_value = mock_data
 
-        instance = RaceData(sentinel.directory)
+        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = RaceData(sentinel.directory)
+
         expected_result = RaceData
         self.assertIsInstance(instance, expected_result)
+
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.TelemetryData')
+    def test_magic_eq_true(self, mock_telemetry_data, _, mock_json):
+        mock_data = MagicMock()
+        mock_data.packet_count = 1
+        mock_data.__next__.return_value = sentinel.packet
+        mock_telemetry_data.return_value = mock_data
+
+        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance_1 = RaceData(sentinel.directory_1)
+            instance_2 = RaceData(sentinel.directory_1)
+
+        self.assertTrue(instance_1 == instance_2)
+
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.TelemetryData')
+    def test_magic_eq_false(self, mock_telemetry_data, _, mock_json):
+        mock_data = MagicMock()
+        mock_data.packet_count = 1
+        mock_data.__next__.return_value = sentinel.packet
+        mock_telemetry_data.return_value = mock_data
+
+        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance_1 = RaceData(sentinel.directory_1)
+            instance_2 = RaceData(sentinel.directory_2)
+
+        self.assertFalse(instance_1 == instance_2)
+
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.TelemetryData')
+    def test_magic_eq_diff_class(self, mock_telemetry_data, _, mock_json):
+        mock_data = MagicMock()
+        mock_data.packet_count = 1
+        mock_data.__next__.return_value = sentinel.packet
+        mock_telemetry_data.return_value = mock_data
+
+        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = RaceData(sentinel.directory)
+
+        self.assertFalse(instance == self)
+
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.TelemetryData')
+    def test_magic_ne_true(self, mock_telemetry_data, _, mock_json):
+        mock_data = MagicMock()
+        mock_data.packet_count = 1
+        mock_data.__next__.return_value = sentinel.packet
+        mock_telemetry_data.return_value = mock_data
+
+        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance_1 = RaceData(sentinel.directory_1)
+            instance_2 = RaceData(sentinel.directory_2)
+
+        self.assertTrue(instance_1 != instance_2)
+
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.TelemetryData')
+    def test_magic_ne_false(self, mock_telemetry_data, _, mock_json):
+        mock_data = MagicMock()
+        mock_data.packet_count = 1
+        mock_data.__next__.return_value = sentinel.packet
+        mock_telemetry_data.return_value = mock_data
+
+        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance_1 = RaceData(sentinel.directory_1)
+            instance_2 = RaceData(sentinel.directory_1)
+
+        self.assertFalse(instance_1 != instance_2)
+
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.TelemetryData')
+    def test_magic_ne_diff_class(self, mock_telemetry_data, _, mock_json):
+        mock_data = MagicMock()
+        mock_data.packet_count = 1
+        mock_data.__next__.return_value = sentinel.packet
+        mock_telemetry_data.return_value = mock_data
+
+        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = RaceData(sentinel.directory)
+
+        self.assertTrue(instance != self)
+
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.TelemetryData')
+    def test_magic_hash(self, mock_telemetry_data, _, mock_json):
+        mock_data = MagicMock()
+        mock_data.packet_count = 1
+        mock_data.__next__.return_value = sentinel.packet
+        mock_telemetry_data.return_value = mock_data
+
+        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = RaceData(sentinel.directory)
+
+        expected_value = hash(sentinel.directory)
+        self.assertEqual(hash(instance), expected_value)
+
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.TelemetryData')
+    def test_magic_repr_default(self, mock_telemetry_data, _, mock_json):
+        mock_data = MagicMock()
+        mock_data.packet_count = 1
+        mock_data.__next__.return_value = sentinel.packet
+        mock_telemetry_data.return_value = mock_data
+
+        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = RaceData(sentinel.directory)
+
+        expected_value = "RaceData(\"sentinel.directory\", " \
+                         "descriptor_filename=\"descriptor.json\")"
+        self.assertEqual(repr(instance), expected_value)
+
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.TelemetryData')
+    def test_magic_repr_custom(self, mock_telemetry_data, _, mock_json):
+        mock_data = MagicMock()
+        mock_data.packet_count = 1
+        mock_data.__next__.return_value = sentinel.packet
+        mock_telemetry_data.return_value = mock_data
+
+        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = RaceData(
+                sentinel.directory,
+                descriptor_filename="custom.json")
+
+        expected_value = "RaceData(\"sentinel.directory\", " \
+                         "descriptor_filename=\"custom.json\")"
+        self.assertEqual(repr(instance), expected_value)
+
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.TelemetryData')
+    def test_magic_str_default(self, mock_telemetry_data, _, mock_json):
+        mock_data = MagicMock()
+        mock_data.packet_count = 1
+        mock_data.__next__.return_value = sentinel.packet
+        mock_telemetry_data.return_value = mock_data
+
+        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = RaceData(sentinel.directory)
+
+        expected_value = "Race Data for sentinel.directory"
+        self.assertEqual(str(instance), expected_value)
 
 
 class TestTelemetryData(unittest.TestCase):
@@ -41,7 +232,7 @@ class TestTelemetryData(unittest.TestCase):
         mock_isdir.return_value = False
 
         with self.assertRaises(NotADirectoryError):
-            instance = TelemetryData(sentinel.directory)
+            _ = TelemetryData(sentinel.directory)
 
     @patch('racedata.RaceData.glob')
     @patch('racedata.RaceData.os.path.isdir')

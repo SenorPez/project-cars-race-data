@@ -192,7 +192,7 @@ class RaceData:
                 return packet
 
     def __repr__(self):
-        return "RaceData(\"{}\", descriptor_filename=\"{}\"".format(
+        return "RaceData(\"{}\", descriptor_filename=\"{}\")".format(
             self.__telemetry_directory,
             self.__descriptor_filename)
 
