@@ -5,11 +5,15 @@ telemetry data.
 import json
 import os
 from glob import glob
+from itertools import tee
 
 from natsort import natsorted
 from tqdm import tqdm
 
 from racedata.Packet import Packet
+from racedata.AdditionalParticipantPacket import AdditionalParticipantPacket
+from racedata.ParticipantPacket import ParticipantPacket
+from racedata.TelemetryDataPacket import TelemetryDataPacket
 
 
 class RaceData:
@@ -54,6 +58,10 @@ class RaceData:
                 self._telemetry_data,
                 descriptor['race_start'])
             self._last_packet = None
+
+            self._current_drivers = self._get_drivers(
+                self._telemetry_data,
+                self._packet.num_participants)
 
     @staticmethod
     def _build_descriptor(telemetry_directory, descriptor_filename):
@@ -178,6 +186,27 @@ class RaceData:
         return descriptor
 
     @staticmethod
+    def _get_drivers(telemetry_data, count):
+        drivers = list()
+        data, restore = tee(telemetry_data._telemetry_iterator, 2)
+
+        while len(drivers) < count:
+            packet = next(data)
+            if packet.packet_type == 0 and packet.num_participants != count:
+                raise ValueError("Participants not populated before break.")
+            elif packet.packet_type == 1:
+                for index, name in enumerate(packet.name):
+                    drivers.append(Driver(index, name))
+            elif packet.packet_type == 2:
+                for index, name in enumerate(packet.name, packet.offset):
+                    drivers.append(Driver(index, name))
+
+        telemetry_data._telemetry_iterator = restore
+
+        # TODO: Do we still need a dictionary?
+        return {driver.name: driver for driver in drivers[:count]}
+
+    @staticmethod
     def _to_hash(telemetry_data, hash_value):
         progress = tqdm(
             desc='Preparing Telemetry Data',
@@ -211,6 +240,31 @@ class RaceData:
 
     def __hash__(self):
         return hash(self.__telemetry_directory)
+
+
+class Driver:
+    def __init__(self, index, name):
+        self.index = index
+        self.name = name
+
+    def __repr__(self):
+        return "Driver({s.index}, \"{s.name}\")".format(s=self)
+
+    def __str__(self):
+        return "{s.name} (Index {s.index})".format(s=self)
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return hash(self) == hash(other)
+        return NotImplemented
+
+    def __ne__(self, other):
+        if isinstance(other, self.__class__):
+            return not hash(self) == hash(other)
+        return NotImplemented
+
+    def __hash__(self):
+        return hash(self.name)
 
 
 class TelemetryData:

@@ -6,23 +6,35 @@ from inspect import isgenerator
 from unittest import mock
 from unittest.mock import MagicMock, mock_open, patch, sentinel
 
-from racedata.RaceData import RaceData, TelemetryData
+from racedata.RaceData import RaceData, TelemetryData, Driver
 
 
 class TestRaceData(unittest.TestCase):
     """Unit tests for RaceData class.
 
     """
-    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.tee')
+    @patch('racedata.RaceData.json')
     @patch('racedata.RaceData.TelemetryData')
-    def test_init(self, mock_telemetry_data, _, mock_json):
+    def test_init(self, mock_telemetry_data, mock_json, mock_tee, *_):
+        mock_packet = MagicMock()
+        mock_packet.num_participants = 1
+
         mock_data = MagicMock()
         mock_data.packet_count = 1
-        mock_data.__next__.return_value = sentinel.packet
+        mock_data.__next__.return_value = mock_packet
+
         mock_telemetry_data.return_value = mock_data
 
-        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = [sentinel.name]
+
+        mock_tee.return_value = (iter([mock_participant_packet]), None)
+
+        mock_json.load.return_value = {'race_start': hash(mock_packet)}
 
         m = mock_open()
         with patch('racedata.RaceData.open', m):
@@ -31,10 +43,16 @@ class TestRaceData(unittest.TestCase):
         expected_result = RaceData
         self.assertIsInstance(instance, expected_result)
 
-    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.tee')
     @patch('racedata.RaceData.TelemetryData')
-    def test_init_no_descriptor_happy_path(self, mock_telemetry_data, *_):
+    def test_init_no_descriptor_happy_path(
+            self,
+            mock_telemetry_data,
+            mock_tee,
+            *_):
         """
         Three packets: Race Start, Race Finish, Race End.
         Nothing spurious.
@@ -51,6 +69,7 @@ class TestRaceData(unittest.TestCase):
         mock_race_start_packet.packet_type = 0
         mock_race_start_packet.race_state = 1
         mock_race_start_packet.session_state = 5
+        mock_race_start_packet.num_participants = 1
 
         mock_data_1 = MagicMock()
         mock_data_1.packet_count = 3
@@ -86,6 +105,12 @@ class TestRaceData(unittest.TestCase):
             mock_data_3,
             mock_data_4]
 
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = [sentinel.name]
+
+        mock_tee.return_value = (iter([mock_participant_packet]), None)
+
         m = mock_open()
         with patch('racedata.RaceData.open', m):
             m.side_effect = [FileNotFoundError, mock.DEFAULT]
@@ -94,10 +119,16 @@ class TestRaceData(unittest.TestCase):
         expected_result = RaceData
         self.assertIsInstance(instance, expected_result)
 
+    @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.json')
     @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.tee')
     @patch('racedata.RaceData.TelemetryData')
-    def test_init_no_descriptor_extra_end_packet(self, mock_telemetry_data, *_):
+    def test_init_no_descriptor_extra_end_packet(
+            self,
+            mock_telemetry_data,
+            mock_tee,
+            *_):
         """
         Extra garbage packet at the end.
         """
@@ -117,6 +148,7 @@ class TestRaceData(unittest.TestCase):
         mock_race_start_packet.packet_type = 0
         mock_race_start_packet.race_state = 1
         mock_race_start_packet.session_state = 5
+        mock_race_start_packet.num_participants = 1
 
         mock_data_1 = MagicMock()
         mock_data_1.packet_count = 3
@@ -156,6 +188,12 @@ class TestRaceData(unittest.TestCase):
             mock_data_3,
             mock_data_4]
 
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = [sentinel.name]
+
+        mock_tee.return_value = (iter([mock_participant_packet]), None)
+
         m = mock_open()
         with patch('racedata.RaceData.open', m):
             m.side_effect = [FileNotFoundError, mock.DEFAULT]
@@ -164,12 +202,15 @@ class TestRaceData(unittest.TestCase):
         expected_result = RaceData
         self.assertIsInstance(instance, expected_result)
 
-    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.tee')
     @patch('racedata.RaceData.TelemetryData')
     def test_init_no_descriptor_extra_start_packet(
             self,
             mock_telemetry_data,
+            mock_tee,
             *_):
         """
         Extra garbage packet at the start.
@@ -190,6 +231,7 @@ class TestRaceData(unittest.TestCase):
         mock_race_start_packet.packet_type = 0
         mock_race_start_packet.race_state = 1
         mock_race_start_packet.session_state = 5
+        mock_race_start_packet.num_participants = 1
 
         mock_data_1 = MagicMock()
         mock_data_1.packet_count = 3
@@ -229,6 +271,12 @@ class TestRaceData(unittest.TestCase):
             mock_data_3,
             mock_data_4]
 
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = [sentinel.name]
+
+        mock_tee.return_value = (iter([mock_participant_packet]), None)
+
         m = mock_open()
         with patch('racedata.RaceData.open', m):
             m.side_effect = [FileNotFoundError, mock.DEFAULT]
@@ -237,10 +285,16 @@ class TestRaceData(unittest.TestCase):
         expected_result = RaceData
         self.assertIsInstance(instance, expected_result)
 
-    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.tee')
     @patch('racedata.RaceData.TelemetryData')
-    def test_init_no_descriptor_unpopulated(self, mock_telemetry_data, *_):
+    def test_init_no_descriptor_unpopulated(
+            self,
+            mock_telemetry_data,
+            mock_tee,
+            *_):
         """
         Start packet without driver population.
         """
@@ -257,6 +311,7 @@ class TestRaceData(unittest.TestCase):
         mock_race_start_packet.race_state = 1
         mock_race_start_packet.session_state = 5
         mock_race_start_packet.game_state = 2
+        mock_race_start_packet.num_participants = 1
 
         mock_unpopulated_packet = MagicMock()
         mock_unpopulated_packet.packet_type = 0
@@ -309,6 +364,12 @@ class TestRaceData(unittest.TestCase):
             mock_data_3,
             mock_data_4]
 
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = [sentinel.name]
+
+        mock_tee.return_value = (iter([mock_participant_packet]), None)
+
         m = mock_open()
         with patch('racedata.RaceData.open', m):
             m.side_effect = [FileNotFoundError, mock.DEFAULT]
@@ -317,16 +378,111 @@ class TestRaceData(unittest.TestCase):
         expected_result = RaceData
         self.assertIsInstance(instance, expected_result)
 
-    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.tee')
+    @patch('racedata.RaceData.json')
     @patch('racedata.RaceData.TelemetryData')
-    def test_magic_eq_true(self, mock_telemetry_data, _, mock_json):
+    def test_init_additional_participants(
+            self,
+            mock_telemetry_data,
+            mock_json,
+            mock_tee,
+            *_):
+        mock_packet = MagicMock()
+        mock_packet.num_participants = 2
+
         mock_data = MagicMock()
         mock_data.packet_count = 1
-        mock_data.__next__.return_value = sentinel.packet
+        mock_data.__next__.return_value = mock_packet
+
         mock_telemetry_data.return_value = mock_data
 
-        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = [sentinel.name]
+
+        mock_additional_participant_packet = MagicMock()
+        mock_additional_participant_packet.packet_type = 2
+        mock_additional_participant_packet.name = [sentinel.additional_name]
+        mock_additional_participant_packet.offset = 1
+
+        mock_tee.return_value = (
+            iter([mock_participant_packet, mock_additional_participant_packet]),
+            None)
+
+        mock_json.load.return_value = {'race_start': hash(mock_packet)}
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = RaceData(sentinel.directory)
+
+        expected_result = RaceData
+        self.assertIsInstance(instance, expected_result)
+
+    @patch('racedata.RaceData.Driver')
+    @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.tee')
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.TelemetryData')
+    def test_init_not_populated_before_break(
+            self,
+            mock_telemetry_data,
+            mock_json,
+            mock_tee,
+            *_):
+        mock_packet = MagicMock()
+        mock_packet.num_participants = 100
+
+        mock_data = MagicMock()
+        mock_data.packet_count = 1
+        mock_data.__next__.return_value = mock_packet
+
+        mock_telemetry_data.return_value = mock_data
+
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = [sentinel.name]
+
+        mock_killer_packet = MagicMock()
+        mock_killer_packet.packet_type = 0
+        mock_killer_packet.num_participants = 1
+
+        mock_tee.return_value = (
+            iter([mock_participant_packet, mock_killer_packet]),
+            None)
+
+        mock_json.load.return_value = {'race_start': hash(mock_packet)}
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            with self.assertRaises(ValueError):
+                _ = RaceData(sentinel.directory)
+
+    @patch('racedata.RaceData.Driver')
+    @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.tee')
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.TelemetryData')
+    def test_magic_eq_true(self, mock_telemetry_data, mock_json, mock_tee, *_):
+        mock_packet = MagicMock()
+        mock_packet.num_participants = 1
+
+        mock_data = MagicMock()
+        mock_data.packet_count = 1
+        mock_data.__next__.return_value = mock_packet
+
+        mock_telemetry_data.return_value = mock_data
+
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = [sentinel.name]
+
+        mock_tee.side_effect = [
+            (iter([mock_participant_packet]), None),
+            (iter([mock_participant_packet]), None)]
+
+        mock_json.load.return_value = {'race_start': hash(mock_packet)}
 
         m = mock_open()
         with patch('racedata.RaceData.open', m):
@@ -335,16 +491,30 @@ class TestRaceData(unittest.TestCase):
 
         self.assertTrue(instance_1 == instance_2)
 
-    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.tee')
+    @patch('racedata.RaceData.json')
     @patch('racedata.RaceData.TelemetryData')
-    def test_magic_eq_false(self, mock_telemetry_data, _, mock_json):
+    def test_magic_eq_false(self, mock_telemetry_data, mock_json, mock_tee, *_):
+        mock_packet = MagicMock()
+        mock_packet.num_participants = 1
+
         mock_data = MagicMock()
         mock_data.packet_count = 1
-        mock_data.__next__.return_value = sentinel.packet
+        mock_data.__next__.return_value = mock_packet
+
         mock_telemetry_data.return_value = mock_data
 
-        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = [sentinel.name]
+
+        mock_tee.side_effect = [
+            (iter([mock_participant_packet]), None),
+            (iter([mock_participant_packet]), None)]
+
+        mock_json.load.return_value = {'race_start': hash(mock_packet)}
 
         m = mock_open()
         with patch('racedata.RaceData.open', m):
@@ -353,16 +523,33 @@ class TestRaceData(unittest.TestCase):
 
         self.assertFalse(instance_1 == instance_2)
 
-    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.tee')
+    @patch('racedata.RaceData.json')
     @patch('racedata.RaceData.TelemetryData')
-    def test_magic_eq_diff_class(self, mock_telemetry_data, _, mock_json):
+    def test_magic_eq_diff_class(
+            self,
+            mock_telemetry_data,
+            mock_json,
+            mock_tee,
+            *_):
+        mock_packet = MagicMock()
+        mock_packet.num_participants = 1
+
         mock_data = MagicMock()
         mock_data.packet_count = 1
-        mock_data.__next__.return_value = sentinel.packet
+        mock_data.__next__.return_value = mock_packet
+
         mock_telemetry_data.return_value = mock_data
 
-        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = [sentinel.name]
+
+        mock_tee.return_value = (iter([mock_participant_packet]), None)
+
+        mock_json.load.return_value = {'race_start': hash(mock_packet)}
 
         m = mock_open()
         with patch('racedata.RaceData.open', m):
@@ -370,16 +557,30 @@ class TestRaceData(unittest.TestCase):
 
         self.assertFalse(instance == self)
 
-    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.tee')
+    @patch('racedata.RaceData.json')
     @patch('racedata.RaceData.TelemetryData')
-    def test_magic_ne_true(self, mock_telemetry_data, _, mock_json):
+    def test_magic_ne_true(self, mock_telemetry_data, mock_json, mock_tee, *_):
+        mock_packet = MagicMock()
+        mock_packet.num_participants = 1
+
         mock_data = MagicMock()
         mock_data.packet_count = 1
-        mock_data.__next__.return_value = sentinel.packet
+        mock_data.__next__.return_value = mock_packet
+
         mock_telemetry_data.return_value = mock_data
 
-        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = [sentinel.name]
+
+        mock_tee.side_effect = [
+            (iter([mock_participant_packet]), None),
+            (iter([mock_participant_packet]), None)]
+
+        mock_json.load.return_value = {'race_start': hash(mock_packet)}
 
         m = mock_open()
         with patch('racedata.RaceData.open', m):
@@ -388,16 +589,30 @@ class TestRaceData(unittest.TestCase):
 
         self.assertTrue(instance_1 != instance_2)
 
-    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.tee')
+    @patch('racedata.RaceData.json')
     @patch('racedata.RaceData.TelemetryData')
-    def test_magic_ne_false(self, mock_telemetry_data, _, mock_json):
+    def test_magic_ne_false(self, mock_telemetry_data, mock_json, mock_tee, *_):
+        mock_packet = MagicMock()
+        mock_packet.num_participants = 1
+
         mock_data = MagicMock()
         mock_data.packet_count = 1
-        mock_data.__next__.return_value = sentinel.packet
+        mock_data.__next__.return_value = mock_packet
+
         mock_telemetry_data.return_value = mock_data
 
-        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = [sentinel.name]
+
+        mock_tee.side_effect = [
+            (iter([mock_participant_packet]), None),
+            (iter([mock_participant_packet]), None)]
+
+        mock_json.load.return_value = {'race_start': hash(mock_packet)}
 
         m = mock_open()
         with patch('racedata.RaceData.open', m):
@@ -406,16 +621,33 @@ class TestRaceData(unittest.TestCase):
 
         self.assertFalse(instance_1 != instance_2)
 
-    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.tee')
+    @patch('racedata.RaceData.json')
     @patch('racedata.RaceData.TelemetryData')
-    def test_magic_ne_diff_class(self, mock_telemetry_data, _, mock_json):
+    def test_magic_ne_diff_class(
+            self,
+            mock_telemetry_data,
+            mock_json,
+            mock_tee,
+            *_):
+        mock_packet = MagicMock()
+        mock_packet.num_participants = 1
+
         mock_data = MagicMock()
         mock_data.packet_count = 1
-        mock_data.__next__.return_value = sentinel.packet
+        mock_data.__next__.return_value = mock_packet
+
         mock_telemetry_data.return_value = mock_data
 
-        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = [sentinel.name]
+
+        mock_tee.return_value = (iter([mock_participant_packet]), None)
+
+        mock_json.load.return_value = {'race_start': hash(mock_packet)}
 
         m = mock_open()
         with patch('racedata.RaceData.open', m):
@@ -423,16 +655,28 @@ class TestRaceData(unittest.TestCase):
 
         self.assertTrue(instance != self)
 
-    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.tee')
+    @patch('racedata.RaceData.json')
     @patch('racedata.RaceData.TelemetryData')
-    def test_magic_hash(self, mock_telemetry_data, _, mock_json):
+    def test_magic_hash(self, mock_telemetry_data, mock_json, mock_tee, *_):
+        mock_packet = MagicMock()
+        mock_packet.num_participants = 1
+
         mock_data = MagicMock()
         mock_data.packet_count = 1
-        mock_data.__next__.return_value = sentinel.packet
+        mock_data.__next__.return_value = mock_packet
+
         mock_telemetry_data.return_value = mock_data
 
-        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = [sentinel.name]
+
+        mock_tee.return_value = (iter([mock_participant_packet]), None)
+
+        mock_json.load.return_value = {'race_start': hash(mock_packet)}
 
         m = mock_open()
         with patch('racedata.RaceData.open', m):
@@ -441,16 +685,33 @@ class TestRaceData(unittest.TestCase):
         expected_value = hash(sentinel.directory)
         self.assertEqual(hash(instance), expected_value)
 
-    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.tee')
+    @patch('racedata.RaceData.json')
     @patch('racedata.RaceData.TelemetryData')
-    def test_magic_repr_default(self, mock_telemetry_data, _, mock_json):
+    def test_magic_repr_default(
+            self,
+            mock_telemetry_data,
+            mock_json,
+            mock_tee,
+            *_):
+        mock_packet = MagicMock()
+        mock_packet.num_participants = 1
+
         mock_data = MagicMock()
         mock_data.packet_count = 1
-        mock_data.__next__.return_value = sentinel.packet
+        mock_data.__next__.return_value = mock_packet
+
         mock_telemetry_data.return_value = mock_data
 
-        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = [sentinel.name]
+
+        mock_tee.return_value = (iter([mock_participant_packet]), None)
+
+        mock_json.load.return_value = {'race_start': hash(mock_packet)}
 
         m = mock_open()
         with patch('racedata.RaceData.open', m):
@@ -460,16 +721,33 @@ class TestRaceData(unittest.TestCase):
                          "descriptor_filename=\"descriptor.json\")"
         self.assertEqual(repr(instance), expected_value)
 
-    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.tee')
+    @patch('racedata.RaceData.json')
     @patch('racedata.RaceData.TelemetryData')
-    def test_magic_repr_custom(self, mock_telemetry_data, _, mock_json):
+    def test_magic_repr_custom(
+            self,
+            mock_telemetry_data,
+            mock_json,
+            mock_tee,
+            *_):
+        mock_packet = MagicMock()
+        mock_packet.num_participants = 1
+
         mock_data = MagicMock()
         mock_data.packet_count = 1
-        mock_data.__next__.return_value = sentinel.packet
+        mock_data.__next__.return_value = mock_packet
+
         mock_telemetry_data.return_value = mock_data
 
-        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = [sentinel.name]
+
+        mock_tee.return_value = (iter([mock_participant_packet]), None)
+
+        mock_json.load.return_value = {'race_start': hash(mock_packet)}
 
         m = mock_open()
         with patch('racedata.RaceData.open', m):
@@ -481,16 +759,33 @@ class TestRaceData(unittest.TestCase):
                          "descriptor_filename=\"custom.json\")"
         self.assertEqual(repr(instance), expected_value)
 
-    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.tee')
+    @patch('racedata.RaceData.json')
     @patch('racedata.RaceData.TelemetryData')
-    def test_magic_str_default(self, mock_telemetry_data, _, mock_json):
+    def test_magic_str_default(
+            self,
+            mock_telemetry_data,
+            mock_json,
+            mock_tee,
+            *_):
+        mock_packet = MagicMock()
+        mock_packet.num_participants = 1
+
         mock_data = MagicMock()
         mock_data.packet_count = 1
-        mock_data.__next__.return_value = sentinel.packet
+        mock_data.__next__.return_value = mock_packet
+
         mock_telemetry_data.return_value = mock_data
 
-        mock_json.load.return_value = {'race_start': hash(sentinel.packet)}
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = [sentinel.name]
+
+        mock_tee.return_value = (iter([mock_participant_packet]), None)
+
+        mock_json.load.return_value = {'race_start': hash(mock_packet)}
 
         m = mock_open()
         with patch('racedata.RaceData.open', m):
@@ -498,6 +793,79 @@ class TestRaceData(unittest.TestCase):
 
         expected_value = "Race Data for sentinel.directory"
         self.assertEqual(str(instance), expected_value)
+
+
+class TestDriver(unittest.TestCase):
+    """Unit tests for Driver class.
+
+    """
+    def test_init(self):
+        instance = Driver(sentinel.index, sentinel.name)
+        expected_result = Driver
+        self.assertIsInstance(instance, expected_result)
+
+    def test_field_index(self):
+        instance = Driver(sentinel.index, sentinel.name)
+        expected_result = sentinel.index
+        self.assertEqual(instance.index, expected_result)
+
+    def test_field_name(self):
+        instance = Driver(sentinel.index, sentinel.name)
+        expected_result = sentinel.name
+        self.assertEqual(instance.name, expected_result)
+
+    def test_magic_repr(self):
+        instance = Driver(sentinel.index, sentinel.name)
+        expected_result = "Driver({s.index}, \"{s.name}\")".format(s=instance)
+        self.assertEqual(repr(instance), expected_result)
+
+    def test_magic_str(self):
+        instance = Driver(sentinel.index, sentinel.name)
+        expected_result = "{s.name} (Index {s.index})".format(s=instance)
+        self.assertEqual(str(instance), expected_result)
+
+    def test_magic_eq_true(self):
+        instance_1 = Driver(sentinel.index, sentinel.name)
+        instance_2 = Driver(sentinel.index, sentinel.name)
+        self.assertTrue(instance_1 == instance_2)
+
+    def test_magic_eq_true_index_change(self):
+        instance_1 = Driver(sentinel.index, sentinel.name)
+        instance_2 = Driver(sentinel.different_index, sentinel.name)
+        self.assertTrue(instance_1 == instance_2)
+
+    def test_magic_eq_false(self):
+        instance_1 = Driver(sentinel.index, sentinel.name)
+        instance_2 = Driver(sentinel.index, sentinel.different_name)
+        self.assertFalse(instance_1 == instance_2)
+
+    def test_magic_eq_diff_class(self):
+        instance = Driver(sentinel.index, sentinel.name)
+        self.assertFalse(instance == self)
+
+    def test_magic_ne_true(self):
+        instance_1 = Driver(sentinel.index, sentinel.name)
+        instance_2 = Driver(sentinel.index, sentinel.different_name)
+        self.assertTrue(instance_1 != instance_2)
+
+    def test_magic_ne_false(self):
+        instance_1 = Driver(sentinel.index, sentinel.name)
+        instance_2 = Driver(sentinel.index, sentinel.name)
+        self.assertFalse(instance_1 != instance_2)
+
+    def test_magic_ne_false_index_change(self):
+        instance_1 = Driver(sentinel.index, sentinel.name)
+        instance_2 = Driver(sentinel.different_index, sentinel.name)
+        self.assertFalse(instance_1 != instance_2)
+
+    def test_magic_ne_diff_class(self):
+        instance = Driver(sentinel.index, sentinel.name)
+        self.assertTrue(instance != self)
+
+    def test_magic_hash(self):
+        instance = Driver(sentinel.index, sentinel.name)
+        expected_result = hash(sentinel.name)
+        self.assertEqual(hash(instance), expected_result)
 
 
 class TestTelemetryData(unittest.TestCase):
