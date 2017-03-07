@@ -74,6 +74,20 @@ class RaceData:
                 in enumerate(self._packet.participant_info)
                 if index < self._packet.num_participants])
 
+    @property
+    def classification(self):
+        drivers_by_index = sorted(
+            [driver for driver in self._current_drivers.values()],
+            key=lambda x: x.index)
+        return frozenset([
+            ClassificationEntry(
+                participant_info.race_position,
+                drivers_by_index[index],
+                self._packet.viewed_participant_index == index)
+            for index, participant_info
+            in enumerate(self._packet.participant_info)
+            if index < self._packet.num_participants])
+
     @staticmethod
     def _build_descriptor(telemetry_directory, descriptor_filename):
         descriptor = {'race_end': None, 'race_finish': None, 'race_start': None}
@@ -253,6 +267,39 @@ class RaceData:
         return hash(self.__telemetry_directory)
 
 
+class ClassificationEntry:
+    def __init__(self, race_position, driver, viewed_driver):
+        self._race_position = race_position
+        self._driver = driver
+        self._viewed_driver = viewed_driver
+
+    def __repr__(self):
+        return "ClassificationEntry(" \
+               "{s._race_position}, {driver_repr}, {s._viewed_driver})".format(
+                    s=self,
+                    driver_repr=repr(self._driver))
+
+    def __str__(self):
+        return "Classification Entry: " \
+               "{s._race_position} {driver_string} " \
+               "Viewed: {s._viewed_driver}".format(
+                    s=self,
+                    driver_string=str(self._driver))
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return hash(self) == hash(other)
+        return NotImplemented
+
+    def __ne__(self, other):
+        if isinstance(other, self.__class__):
+            return not hash(self) == hash(other)
+        return NotImplemented
+
+    def __hash__(self):
+        return hash((self._race_position, self._driver, self._viewed_driver))
+
+
 class Driver:
     def __init__(self, index, name):
         self.index = index
@@ -282,17 +329,17 @@ class StartingGridEntry:
     """Class representing a starting grid entry.
 
     """
-    def __init__(self, position: int, driver: Driver):
-        self._position = position
+    def __init__(self, race_position: int, driver: Driver):
+        self._race_position = race_position
         self._driver = driver
 
     def __repr__(self):
-        return "StartingGridEntry({s._position}, {driver_repr})".format(
+        return "StartingGridEntry({s._race_position}, {driver_repr})".format(
             s=self,
             driver_repr=repr(self._driver))
 
     def __str__(self):
-        return "Starting Grid Entry: {s._position} {driver_string}".format(
+        return "Starting Grid Entry: {s._race_position} {driver_string}".format(
             s=self,
             driver_string=str(self._driver))
 
@@ -307,7 +354,7 @@ class StartingGridEntry:
         return NotImplemented
 
     def __hash__(self):
-        return hash((self._position, self._driver))
+        return hash((self._race_position, self._driver))
 
 
 class TelemetryData:

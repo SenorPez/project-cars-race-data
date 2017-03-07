@@ -6,7 +6,8 @@ from inspect import isgenerator
 from unittest import mock
 from unittest.mock import MagicMock, mock_open, patch, sentinel
 
-from racedata.RaceData import RaceData, TelemetryData, Driver, StartingGridEntry
+from racedata.RaceData import ClassificationEntry, Driver, RaceData, \
+    StartingGridEntry, TelemetryData
 
 
 class TestRaceData(unittest.TestCase):
@@ -465,6 +466,58 @@ class TestRaceData(unittest.TestCase):
             with self.assertRaises(ValueError):
                 _ = RaceData(sentinel.directory)
 
+    @patch('racedata.RaceData.ClassificationEntry', autospec=True)
+    @patch('racedata.RaceData.StartingGridEntry', autospec=True)
+    @patch('racedata.RaceData.Driver', autospec=True)
+    @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.tee')
+    @patch('racedata.RaceData.json')
+    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
+    @patch('racedata.TelemetryDataPacket.TelemetryDataPacket', autospec=True)
+    @patch('racedata.RaceData.TelemetryData', autospec=True)
+    def test_property_classification(self, mock_telemetry_data, mock_packet, mock_participant_info, mock_json,
+                                     mock_tee, mock_os, mock_driver, mock_starting_grid_entry,
+                                     mock_classification_entry):
+        mock_driver.return_value.index = 0
+        mock_driver.return_value.name = "Kobernulf Monnur"
+
+        mock_participant_info.race_position = 1
+
+        mock_packet.return_value.num_participants = 1
+        mock_packet.return_value.name = [mock_driver]
+        mock_packet.return_value.participant_info = [mock_participant_info]
+        mock_packet.return_value.viewed_participant_index = 0
+        mock_packet_instance = mock_packet.return_value
+
+        mock_data = MagicMock()
+        mock_data.packet_count = 1
+        mock_data.__next__.return_value = mock_packet_instance
+
+        mock_telemetry_data.return_value = mock_data
+
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = ["Kobernulf Monnur"]
+
+        mock_tee.return_value = (iter([mock_participant_packet]), None)
+
+        mock_json.load.return_value = {'race_start': hash(mock_packet_instance)}
+
+        mock_entry = MagicMock(spec=ClassificationEntry)
+        mock_entry._race_position = 1
+        mock_entry._driver = mock_driver
+        mock_entry._viewed_driver = True
+
+        mock_classification_entry.return_value = mock_entry
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = RaceData(sentinel.directory)
+
+        expected_result = frozenset({mock_entry})
+        self.assertSetEqual(instance.classification, expected_result)
+
+
     @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
@@ -851,6 +904,110 @@ class TestRaceData(unittest.TestCase):
         self.assertEqual(str(instance), expected_value)
 
 
+class TestClassificationEntry(unittest.TestCase):
+    """Unit tests for ClassificationEntry class.
+
+    """
+    def test_init(self):
+        instance = ClassificationEntry(
+            sentinel.race_position,
+            sentinel.driver,
+            False)
+        expected_result = ClassificationEntry
+        self.assertIsInstance(instance, expected_result)
+
+    def test_magic_repr(self):
+        instance = ClassificationEntry(
+            sentinel.race_position,
+            sentinel.driver,
+            False)
+        expected_result = \
+            "ClassificationEntry(" \
+            "{s._race_position}, {driver_repr}, {s._viewed_driver})".format(
+                s=instance,
+                driver_repr=repr(instance._driver))
+        self.assertEqual(repr(instance), expected_result)
+
+    def test_magic_str(self):
+        instance = ClassificationEntry(
+            sentinel.race_position,
+            sentinel.driver,
+            False)
+        expected_result = \
+            "Classification Entry: " \
+            "{s._race_position} {driver_string} " \
+            "Viewed: {s._viewed_driver}".format(
+                s=instance,
+                driver_string=str(instance._driver))
+        self.assertEqual(str(instance), expected_result)
+
+    def test_magic_eq_true(self):
+        instance_1 = ClassificationEntry(
+            sentinel.race_position,
+            sentinel.driver,
+            False)
+        instance_2 = ClassificationEntry(
+            sentinel.race_position,
+            sentinel.driver,
+            False)
+        self.assertTrue(instance_1 == instance_2)
+
+    def test_magic_eq_false(self):
+        instance_1 = ClassificationEntry(
+            sentinel.race_position,
+            sentinel.driver,
+            False)
+        instance_2 = ClassificationEntry(
+            sentinel.race_position,
+            sentinel.different_driver,
+            False)
+        self.assertFalse(instance_1 == instance_2)
+
+    def test_magic_eq_diff_class(self):
+        instance = ClassificationEntry(
+            sentinel.race_position,
+            sentinel.driver,
+            False)
+        self.assertFalse(instance == self)
+
+    def test_magic_ne_true(self):
+        instance_1 = ClassificationEntry(
+            sentinel.race_position,
+            sentinel.driver,
+            False)
+        instance_2 = ClassificationEntry(
+            sentinel.race_position,
+            sentinel.different_driver,
+            False)
+        self.assertTrue(instance_1 != instance_2)
+
+    def test_magic_ne_false(self):
+        instance_1 = ClassificationEntry(
+            sentinel.race_position,
+            sentinel.driver,
+            False)
+        instance_2 = ClassificationEntry(
+            sentinel.race_position,
+            sentinel.driver,
+            False)
+        self.assertFalse(instance_1 != instance_2)
+
+    def test_magic_ne_diff_class(self):
+        instance = ClassificationEntry(
+            sentinel.race_position,
+            sentinel.driver,
+            False)
+        self.assertTrue(instance != self)
+
+    def test_magic_hash(self):
+        instance = ClassificationEntry(
+            sentinel.race_position,
+            sentinel.driver,
+            False)
+        expected_result = hash((sentinel.race_position, sentinel.driver, False))
+        self.assertEqual(hash(instance), expected_result)
+
+
 class TestDriver(unittest.TestCase):
     """Unit tests for Driver class.
 
@@ -929,61 +1086,61 @@ class TestStartingGridEntry(unittest.TestCase):
 
     """
     def test_init(self):
-        instance = StartingGridEntry(sentinel.position, sentinel.driver)
+        instance = StartingGridEntry(sentinel.race_position, sentinel.driver)
         expected_result = StartingGridEntry
         self.assertIsInstance(instance, expected_result)
 
     def test_magic_repr(self):
-        instance = StartingGridEntry(sentinel.position, sentinel.driver)
+        instance = StartingGridEntry(sentinel.race_position, sentinel.driver)
         expected_result = \
-            "StartingGridEntry({s._position}, {driver_repr})".format(
+            "StartingGridEntry({s._race_position}, {driver_repr})".format(
                 s=instance,
                 driver_repr=repr(instance._driver))
         self.assertEqual(repr(instance), expected_result)
 
     def test_magic_str(self):
-        instance = StartingGridEntry(sentinel.position, sentinel.driver)
+        instance = StartingGridEntry(sentinel.race_position, sentinel.driver)
         expected_result = \
-            "Starting Grid Entry: {s._position} {driver_string}".format(
+            "Starting Grid Entry: {s._race_position} {driver_string}".format(
                 s=instance,
                 driver_string=str(instance._driver))
         self.assertEqual(str(instance), expected_result)
 
     def test_magic_eq_true(self):
-        instance_1 = StartingGridEntry(sentinel.position, sentinel.driver)
-        instance_2 = StartingGridEntry(sentinel.position, sentinel.driver)
+        instance_1 = StartingGridEntry(sentinel.race_position, sentinel.driver)
+        instance_2 = StartingGridEntry(sentinel.race_position, sentinel.driver)
         self.assertTrue(instance_1 == instance_2)
 
     def test_magic_eq_false(self):
-        instance_1 = StartingGridEntry(sentinel.position, sentinel.driver)
+        instance_1 = StartingGridEntry(sentinel.race_position, sentinel.driver)
         instance_2 = StartingGridEntry(
-            sentinel.position,
+            sentinel.race_position,
             sentinel.different_driver)
         self.assertFalse(instance_1 == instance_2)
 
     def test_magic_eq_diff_class(self):
-        instance = StartingGridEntry(sentinel.position, sentinel.driver)
+        instance = StartingGridEntry(sentinel.race_position, sentinel.driver)
         self.assertFalse(instance == self)
 
     def test_magic_ne_true(self):
-        instance_1 = StartingGridEntry(sentinel.position, sentinel.driver)
+        instance_1 = StartingGridEntry(sentinel.race_position, sentinel.driver)
         instance_2 = StartingGridEntry(
-            sentinel.position,
+            sentinel.race_position,
             sentinel.different_driver)
         self.assertTrue(instance_1 != instance_2)
 
     def test_magic_ne_false(self):
-        instance_1 = StartingGridEntry(sentinel.position, sentinel.driver)
-        instance_2 = StartingGridEntry(sentinel.position, sentinel.driver)
+        instance_1 = StartingGridEntry(sentinel.race_position, sentinel.driver)
+        instance_2 = StartingGridEntry(sentinel.race_position, sentinel.driver)
         self.assertFalse(instance_1 != instance_2)
 
     def test_magic_ne_diff_class(self):
-        instance = StartingGridEntry(sentinel.position, sentinel.driver)
+        instance = StartingGridEntry(sentinel.race_position, sentinel.driver)
         self.assertTrue(instance != self)
 
     def test_magic_hash(self):
-        instance = StartingGridEntry(sentinel.position, sentinel.driver)
-        expected_result = hash((sentinel.position, sentinel.driver))
+        instance = StartingGridEntry(sentinel.race_position, sentinel.driver)
+        expected_result = hash((sentinel.race_position, sentinel.driver))
         self.assertEqual(hash(instance), expected_result)
 
 
