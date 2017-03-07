@@ -6,13 +6,14 @@ from inspect import isgenerator
 from unittest import mock
 from unittest.mock import MagicMock, mock_open, patch, sentinel
 
-from racedata.RaceData import RaceData, TelemetryData, Driver
+from racedata.RaceData import RaceData, TelemetryData, Driver, StartingGridEntry
 
 
 class TestRaceData(unittest.TestCase):
     """Unit tests for RaceData class.
 
     """
+    @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -43,6 +44,7 @@ class TestRaceData(unittest.TestCase):
         expected_result = RaceData
         self.assertIsInstance(instance, expected_result)
 
+    @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.json')
@@ -119,6 +121,7 @@ class TestRaceData(unittest.TestCase):
         expected_result = RaceData
         self.assertIsInstance(instance, expected_result)
 
+    @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.json')
     @patch('racedata.RaceData.os')
@@ -202,6 +205,7 @@ class TestRaceData(unittest.TestCase):
         expected_result = RaceData
         self.assertIsInstance(instance, expected_result)
 
+    @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.json')
@@ -285,6 +289,7 @@ class TestRaceData(unittest.TestCase):
         expected_result = RaceData
         self.assertIsInstance(instance, expected_result)
 
+    @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.json')
@@ -378,6 +383,7 @@ class TestRaceData(unittest.TestCase):
         expected_result = RaceData
         self.assertIsInstance(instance, expected_result)
 
+    @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -459,6 +465,47 @@ class TestRaceData(unittest.TestCase):
             with self.assertRaises(ValueError):
                 _ = RaceData(sentinel.directory)
 
+    @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Driver')
+    @patch('racedata.RaceData.os')
+    @patch('racedata.RaceData.tee')
+    @patch('racedata.RaceData.json')
+    @patch('racedata.RaceData.TelemetryData')
+    def test_field_starting_grid(
+            self,
+            mock_telemetry_data,
+            mock_json,
+            mock_tee,
+            *_):
+        mock_participant_info = MagicMock()
+        mock_participant_info.race_position = 1
+
+        mock_packet = MagicMock()
+        mock_packet.num_participants = 1
+        mock_packet.participant_info = [mock_participant_info]
+
+        mock_data = MagicMock()
+        mock_data.packet_count = 1
+        mock_data.__next__.return_value = mock_packet
+
+        mock_telemetry_data.return_value = mock_data
+
+        mock_participant_packet = MagicMock()
+        mock_participant_packet.packet_type = 1
+        mock_participant_packet.name = [sentinel.name]
+
+        mock_tee.return_value = (iter([mock_participant_packet]), None)
+
+        mock_json.load.return_value = {'race_start': hash(mock_packet)}
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = RaceData(sentinel.directory)
+
+        expected_result = frozenset
+        self.assertIsInstance(instance.starting_grid, expected_result)
+
+    @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -491,6 +538,7 @@ class TestRaceData(unittest.TestCase):
 
         self.assertTrue(instance_1 == instance_2)
 
+    @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -523,6 +571,7 @@ class TestRaceData(unittest.TestCase):
 
         self.assertFalse(instance_1 == instance_2)
 
+    @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -557,6 +606,7 @@ class TestRaceData(unittest.TestCase):
 
         self.assertFalse(instance == self)
 
+    @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -589,6 +639,7 @@ class TestRaceData(unittest.TestCase):
 
         self.assertTrue(instance_1 != instance_2)
 
+    @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -621,6 +672,7 @@ class TestRaceData(unittest.TestCase):
 
         self.assertFalse(instance_1 != instance_2)
 
+    @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -655,6 +707,7 @@ class TestRaceData(unittest.TestCase):
 
         self.assertTrue(instance != self)
 
+    @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -685,6 +738,7 @@ class TestRaceData(unittest.TestCase):
         expected_value = hash(sentinel.directory)
         self.assertEqual(hash(instance), expected_value)
 
+    @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -721,6 +775,7 @@ class TestRaceData(unittest.TestCase):
                          "descriptor_filename=\"descriptor.json\")"
         self.assertEqual(repr(instance), expected_value)
 
+    @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -759,6 +814,7 @@ class TestRaceData(unittest.TestCase):
                          "descriptor_filename=\"custom.json\")"
         self.assertEqual(repr(instance), expected_value)
 
+    @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -865,6 +921,69 @@ class TestDriver(unittest.TestCase):
     def test_magic_hash(self):
         instance = Driver(sentinel.index, sentinel.name)
         expected_result = hash(sentinel.name)
+        self.assertEqual(hash(instance), expected_result)
+
+
+class TestStartingGridEntry(unittest.TestCase):
+    """Unit tests for Driver class.
+
+    """
+    def test_init(self):
+        instance = StartingGridEntry(sentinel.position, sentinel.driver)
+        expected_result = StartingGridEntry
+        self.assertIsInstance(instance, expected_result)
+
+    def test_magic_repr(self):
+        instance = StartingGridEntry(sentinel.position, sentinel.driver)
+        expected_result = \
+            "StartingGridEntry({s._position}, {driver_repr})".format(
+                s=instance,
+                driver_repr=repr(instance._driver))
+        self.assertEqual(repr(instance), expected_result)
+
+    def test_magic_str(self):
+        instance = StartingGridEntry(sentinel.position, sentinel.driver)
+        expected_result = \
+            "Starting Grid Entry: {s._position} {driver_string}".format(
+                s=instance,
+                driver_string=str(instance._driver))
+        self.assertEqual(str(instance), expected_result)
+
+    def test_magic_eq_true(self):
+        instance_1 = StartingGridEntry(sentinel.position, sentinel.driver)
+        instance_2 = StartingGridEntry(sentinel.position, sentinel.driver)
+        self.assertTrue(instance_1 == instance_2)
+
+    def test_magic_eq_false(self):
+        instance_1 = StartingGridEntry(sentinel.position, sentinel.driver)
+        instance_2 = StartingGridEntry(
+            sentinel.position,
+            sentinel.different_driver)
+        self.assertFalse(instance_1 == instance_2)
+
+    def test_magic_eq_diff_class(self):
+        instance = StartingGridEntry(sentinel.position, sentinel.driver)
+        self.assertFalse(instance == self)
+
+    def test_magic_ne_true(self):
+        instance_1 = StartingGridEntry(sentinel.position, sentinel.driver)
+        instance_2 = StartingGridEntry(
+            sentinel.position,
+            sentinel.different_driver)
+        self.assertTrue(instance_1 != instance_2)
+
+    def test_magic_ne_false(self):
+        instance_1 = StartingGridEntry(sentinel.position, sentinel.driver)
+        instance_2 = StartingGridEntry(sentinel.position, sentinel.driver)
+        self.assertFalse(instance_1 != instance_2)
+
+    def test_magic_ne_diff_class(self):
+        instance = StartingGridEntry(sentinel.position, sentinel.driver)
+        self.assertTrue(instance != self)
+
+    def test_magic_hash(self):
+        instance = StartingGridEntry(sentinel.position, sentinel.driver)
+        expected_result = hash((sentinel.position, sentinel.driver))
         self.assertEqual(hash(instance), expected_result)
 
 

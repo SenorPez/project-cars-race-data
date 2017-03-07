@@ -63,6 +63,17 @@ class RaceData:
                 self._telemetry_data,
                 self._packet.num_participants)
 
+            drivers_by_index = sorted(
+                [driver for driver in self._current_drivers.values()],
+                key=lambda x: x.index)
+            self.starting_grid = frozenset([
+                StartingGridEntry(
+                    participant_info.race_position,
+                    drivers_by_index[index])
+                for index, participant_info
+                in enumerate(self._packet.participant_info)
+                if index < self._packet.num_participants])
+
     @staticmethod
     def _build_descriptor(telemetry_directory, descriptor_filename):
         descriptor = {'race_end': None, 'race_finish': None, 'race_start': None}
@@ -267,6 +278,38 @@ class Driver:
         return hash(self.name)
 
 
+class StartingGridEntry:
+    """Class representing a starting grid entry.
+
+    """
+    def __init__(self, position: int, driver: Driver):
+        self._position = position
+        self._driver = driver
+
+    def __repr__(self):
+        return "StartingGridEntry({s._position}, {driver_repr})".format(
+            s=self,
+            driver_repr=repr(self._driver))
+
+    def __str__(self):
+        return "Starting Grid Entry: {s._position} {driver_string}".format(
+            s=self,
+            driver_string=str(self._driver))
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return hash(self) == hash(other)
+        return NotImplemented
+
+    def __ne__(self, other):
+        if isinstance(other, self.__class__):
+            return not hash(self) == hash(other)
+        return NotImplemented
+
+    def __hash__(self):
+        return hash((self._position, self._driver))
+
+
 class TelemetryData:
     """Class representing a directory of telemetry data.
 
@@ -325,4 +368,3 @@ class TelemetryData:
 
     def __next__(self):
         return next(self._telemetry_iterator)
-
