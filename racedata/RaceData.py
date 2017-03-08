@@ -62,17 +62,22 @@ class RaceData:
             self._current_drivers = self._get_drivers(
                 self._telemetry_data,
                 self._packet.num_participants)
+            self._dropped_drivers = dict()
+
+            self._track = None
+            self._elapsed_time = None
 
             drivers_by_index = sorted(
                 [driver for driver in self._current_drivers.values()],
                 key=lambda x: x.index)
-            self.starting_grid = frozenset([
+            self._starting_grid = frozenset([
                 StartingGridEntry(
                     participant_info.race_position,
                     drivers_by_index[index])
                 for index, participant_info
                 in enumerate(self._packet.participant_info)
                 if index < self._packet.num_participants])
+            pass
 
     @property
     def classification(self):
@@ -87,6 +92,60 @@ class RaceData:
             for index, participant_info
             in enumerate(self._packet.participant_info)
             if index < self._packet.num_participants])
+
+    def get_all_data(self):
+        progress = tqdm(
+            desc='Processing All Telemetry Data',
+            total=self._telemetry_data.packet_count,
+            unit='packets')
+        try:
+            while True:
+                _ = self.get_data()
+                progress.update()
+        except StopIteration:
+            progress.close()
+
+    def get_data(self, at_time=None):
+        while True:
+            self._last_packet = self._packet
+            self._packet = None
+
+            try:
+                while self._packet is None or self._packet.packet_type != 0:
+                    self._packet = next(self._telemetry_data)
+            except StopIteration:
+                self._packet = self._last_packet
+                raise
+
+            if self._packet.num_participants \
+                    != self._last_packet.num_participants \
+                    and self._packet.num_participants != -1:
+                current_drivers = self._get_drivers(
+                    self._telemetry_data,
+                    self._packet.num_participants)
+
+                # Add any new drivers.
+                for key in current_drivers.keys() \
+                        - self._current_drivers.keys():
+                    self._current_drivers[key] = current_drivers[key]
+
+                # Delete any dropped drivers.
+                for key in self._current_drivers.keys() \
+                        - current_drivers.keys():
+                    self._dropped_drivers[key] = self._current_drivers[key]
+                    del self._current_drivers[key]
+
+                # Reset indices for drivers that remain.
+                for key in current_drivers.keys():
+                    self._current_drivers[key].index \
+                        = current_drivers[key].index
+
+            # self._track = Track(self._packet.track_length)
+            # self._add_sector_times(self._packet)
+            self._calc_elapsed_time()
+
+            if at_time is None or self._elapsed_time >= at_time:
+                return self._packet
 
     @staticmethod
     def _build_descriptor(telemetry_directory, descriptor_filename):
@@ -210,6 +269,17 @@ class RaceData:
 
         return descriptor
 
+    def _calc_elapsed_time(self):
+        if self._packet.current_time == -1.0:
+            self._elapsed_time = 0.0
+            self._last_packet = None
+        else:
+            driver = next(
+                driver for driver in self._current_drivers.values()
+                if driver.index == self._packet.viewed_participant_index)
+            self._elapsed_time = \
+                sum(driver.lap_times) + self._packet.current_time
+
     @staticmethod
     def _get_drivers(telemetry_data, count):
         drivers = list()
@@ -228,7 +298,6 @@ class RaceData:
 
         telemetry_data._telemetry_iterator = restore
 
-        # TODO: Do we still need a dictionary?
         return {driver.name: driver for driver in drivers[:count]}
 
     @staticmethod
@@ -304,6 +373,7 @@ class Driver:
     def __init__(self, index, name):
         self.index = index
         self.name = name
+        self.lap_times = []
 
     def __repr__(self):
         return "Driver({s.index}, \"{s.name}\")".format(s=self)

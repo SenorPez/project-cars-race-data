@@ -480,7 +480,6 @@ class TestRaceData(unittest.TestCase):
         mock_packet.viewed_participant_index = 0
         mock_to_hash.return_value = mock_packet
 
-        from racedata.RaceData import Driver
         mock_driver = MagicMock(spec=Driver)
         mock_driver.index = 0
 
@@ -493,7 +492,6 @@ class TestRaceData(unittest.TestCase):
                 patch('racedata.RaceData.json.load'):
             instance = RaceData(sentinel.directory)
 
-        from racedata.RaceData import ClassificationEntry
         expected_result = {ClassificationEntry(1, mock_driver, True)}
         self.assertSetEqual(instance.classification, expected_result)
 
@@ -535,7 +533,224 @@ class TestRaceData(unittest.TestCase):
             instance = RaceData(sentinel.directory)
 
         expected_result = frozenset
-        self.assertIsInstance(instance.starting_grid, expected_result)
+        self.assertIsInstance(instance._starting_grid, expected_result)
+
+    @patch('racedata.RaceData.RaceData._get_drivers')
+    @patch('racedata.RaceData.RaceData._to_hash')
+    def test_method_get_data(self, mock_to_hash, mock_get_drivers):
+        from racedata.TelemetryDataPacket import ParticipantInfo
+        mock_participant_info = MagicMock(spec=ParticipantInfo)
+        mock_participant_info.race_position = 1
+
+        from racedata.TelemetryDataPacket import TelemetryDataPacket
+        mock_packet_1 = MagicMock(spec=TelemetryDataPacket)
+        mock_packet_1.num_participants = 1
+        mock_packet_1.participant_info = [mock_participant_info]
+        mock_packet_1.viewed_participant_index = 0
+        mock_to_hash.return_value = mock_packet_1
+
+        mock_packet_2 = MagicMock(spec=TelemetryDataPacket)
+        mock_packet_2.packet_type = 0
+        mock_packet_2.num_participants = 1
+        mock_packet_2.participant_info = [mock_participant_info]
+        mock_packet_2.viewed_participant_index = 0
+        mock_packet_2.current_time = 0.1
+
+        mock_driver = MagicMock(spec=Driver)
+        mock_driver.index = 0
+        mock_driver.lap_times = list()
+
+        mock_get_drivers.return_value = {'Kobernulf Monnur': mock_driver}
+
+        m = mock_open()
+        with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.os'), \
+                patch('racedata.RaceData.json.load'):
+            mock_telemetry_data.return_value.__next__.return_value \
+                = mock_packet_2
+            instance = RaceData(sentinel.directory)
+
+        from racedata.TelemetryDataPacket import TelemetryDataPacket
+        expected_result = TelemetryDataPacket
+        self.assertIsInstance(instance.get_data(), expected_result)
+
+    @patch('racedata.RaceData.RaceData._get_drivers')
+    @patch('racedata.RaceData.RaceData._to_hash')
+    def test_method_get_data_reset_elapsed_time(
+            self,
+            mock_to_hash,
+            mock_get_drivers):
+        from racedata.TelemetryDataPacket import ParticipantInfo
+        mock_participant_info = MagicMock(spec=ParticipantInfo)
+        mock_participant_info.race_position = 1
+
+        from racedata.TelemetryDataPacket import TelemetryDataPacket
+        mock_packet_1 = MagicMock(spec=TelemetryDataPacket)
+        mock_packet_1.num_participants = 1
+        mock_packet_1.participant_info = [mock_participant_info]
+        mock_packet_1.viewed_participant_index = 0
+        mock_to_hash.return_value = mock_packet_1
+
+        mock_packet_2 = MagicMock(spec=TelemetryDataPacket)
+        mock_packet_2.packet_type = 0
+        mock_packet_2.num_participants = 1
+        mock_packet_2.participant_info = [mock_participant_info]
+        mock_packet_2.viewed_participant_index = 0
+        mock_packet_2.current_time = -1.0
+
+        mock_driver = MagicMock(spec=Driver)
+        mock_driver.index = 0
+        mock_driver.lap_times = list()
+
+        mock_get_drivers.return_value = {'Kobernulf Monnur': mock_driver}
+
+        m = mock_open()
+        with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.os'), \
+                patch('racedata.RaceData.json.load'):
+            mock_telemetry_data.return_value.__next__.return_value \
+                = mock_packet_2
+            instance = RaceData(sentinel.directory)
+
+        from racedata.TelemetryDataPacket import TelemetryDataPacket
+        expected_result = TelemetryDataPacket
+        self.assertIsInstance(instance.get_data(), expected_result)
+
+    @patch('racedata.RaceData.RaceData._get_drivers')
+    @patch('racedata.RaceData.RaceData._to_hash')
+    def test_method_get_data_last_packet(self, mock_to_hash, mock_get_drivers):
+        from racedata.TelemetryDataPacket import ParticipantInfo
+        mock_participant_info = MagicMock(spec=ParticipantInfo)
+        mock_participant_info.race_position = 1
+
+        from racedata.TelemetryDataPacket import TelemetryDataPacket
+        mock_packet_1 = MagicMock(spec=TelemetryDataPacket)
+        mock_packet_1.num_participants = 1
+        mock_packet_1.participant_info = [mock_participant_info]
+        mock_packet_1.viewed_participant_index = 0
+        mock_to_hash.return_value = mock_packet_1
+
+        mock_packet_2 = MagicMock(spec=TelemetryDataPacket)
+        mock_packet_2.packet_type = 0
+        mock_packet_2.num_participants = 1
+        mock_packet_2.participant_info = [mock_participant_info]
+        mock_packet_2.viewed_participant_index = 0
+        mock_packet_2.current_time = 0.1
+
+        mock_driver = MagicMock(spec=Driver)
+        mock_driver.index = 0
+        mock_driver.lap_times = list()
+
+        mock_get_drivers.return_value = {'Kobernulf Monnur': mock_driver}
+
+        m = mock_open()
+        with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.os'), \
+                patch('racedata.RaceData.json.load'):
+            mock_telemetry_data.return_value.__next__.side_effect \
+                = StopIteration
+            instance = RaceData(sentinel.directory)
+
+        with self.assertRaises(StopIteration):
+            instance.get_data()
+
+    @patch('racedata.RaceData.RaceData._get_drivers')
+    @patch('racedata.RaceData.RaceData._to_hash')
+    def test_method_get_data_driver_added(self, mock_to_hash, mock_get_drivers):
+        from racedata.TelemetryDataPacket import ParticipantInfo
+        mock_participant_info = MagicMock(spec=ParticipantInfo)
+        mock_participant_info.race_position = 1
+
+        from racedata.TelemetryDataPacket import TelemetryDataPacket
+        mock_packet_1 = MagicMock(spec=TelemetryDataPacket)
+        mock_packet_1.num_participants = 1
+        mock_packet_1.participant_info = [mock_participant_info]
+        mock_packet_1.viewed_participant_index = 0
+        mock_to_hash.return_value = mock_packet_1
+
+        mock_packet_2 = MagicMock(spec=TelemetryDataPacket)
+        mock_packet_2.packet_type = 0
+        mock_packet_2.num_participants = 2
+        mock_packet_2.participant_info = [mock_participant_info]
+        mock_packet_2.viewed_participant_index = 0
+        mock_packet_2.current_time = 0.1
+
+        mock_driver_1 = MagicMock(spec=Driver)
+        mock_driver_1.index = 0
+        mock_driver_1.lap_times = list()
+
+        mock_driver_2 = MagicMock(spec=Driver)
+        mock_driver_2.index = 1
+        mock_driver_2.lap_times = list()
+
+        mock_get_drivers.side_effect = [
+            {'Kobernulf Monnur': mock_driver_1},
+            {'Kobernulf Monnur': mock_driver_1, 'Testy McTest': mock_driver_2}]
+
+        m = mock_open()
+        with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.os'), \
+                patch('racedata.RaceData.json.load'):
+            mock_telemetry_data.return_value.__next__.return_value \
+                = mock_packet_2
+            instance = RaceData(sentinel.directory)
+
+        from racedata.TelemetryDataPacket import TelemetryDataPacket
+        expected_result = TelemetryDataPacket
+        self.assertIsInstance(instance.get_data(), expected_result)
+
+    @patch('racedata.RaceData.RaceData._get_drivers')
+    @patch('racedata.RaceData.RaceData._to_hash')
+    def test_method_get_data_driver_deleted(
+            self,
+            mock_to_hash,
+            mock_get_drivers):
+        from racedata.TelemetryDataPacket import ParticipantInfo
+        mock_participant_info = MagicMock(spec=ParticipantInfo)
+        mock_participant_info.race_position = 1
+
+        from racedata.TelemetryDataPacket import TelemetryDataPacket
+        mock_packet_1 = MagicMock(spec=TelemetryDataPacket)
+        mock_packet_1.num_participants = 2
+        mock_packet_1.participant_info = [mock_participant_info]
+        mock_packet_1.viewed_participant_index = 0
+        mock_to_hash.return_value = mock_packet_1
+
+        mock_packet_2 = MagicMock(spec=TelemetryDataPacket)
+        mock_packet_2.packet_type = 0
+        mock_packet_2.num_participants = 1
+        mock_packet_2.participant_info = [mock_participant_info]
+        mock_packet_2.viewed_participant_index = 0
+        mock_packet_2.current_time = 0.1
+
+        mock_driver_1 = MagicMock(spec=Driver)
+        mock_driver_1.index = 1
+        mock_driver_1.lap_times = list()
+
+        mock_driver_2 = MagicMock(spec=Driver)
+        mock_driver_2.index = 0
+        mock_driver_2.lap_times = list()
+
+        mock_get_drivers.side_effect = [
+            {'Testy McTest': mock_driver_2, 'Kobernulf Monnur': mock_driver_1},
+            {'Testy McTest': mock_driver_2}]
+
+        m = mock_open()
+        with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.os'), \
+                patch('racedata.RaceData.json.load'):
+            mock_telemetry_data.return_value.__next__.return_value \
+                = mock_packet_2
+            instance = RaceData(sentinel.directory)
+
+        from racedata.TelemetryDataPacket import TelemetryDataPacket
+        expected_result = TelemetryDataPacket
+        self.assertIsInstance(instance.get_data(), expected_result)
 
     @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
