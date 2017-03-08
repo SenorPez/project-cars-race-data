@@ -466,57 +466,36 @@ class TestRaceData(unittest.TestCase):
             with self.assertRaises(ValueError):
                 _ = RaceData(sentinel.directory)
 
-    @patch('racedata.RaceData.ClassificationEntry', autospec=True)
-    @patch('racedata.RaceData.StartingGridEntry', autospec=True)
-    @patch('racedata.RaceData.Driver', autospec=True)
-    @patch('racedata.RaceData.os')
-    @patch('racedata.RaceData.tee')
-    @patch('racedata.RaceData.json')
-    @patch('racedata.TelemetryDataPacket.ParticipantInfo', autospec=True)
-    @patch('racedata.TelemetryDataPacket.TelemetryDataPacket', autospec=True)
-    @patch('racedata.RaceData.TelemetryData', autospec=True)
-    def test_property_classification(self, mock_telemetry_data, mock_packet, mock_participant_info, mock_json,
-                                     mock_tee, mock_os, mock_driver, mock_starting_grid_entry,
-                                     mock_classification_entry):
-        mock_driver.return_value.index = 0
-        mock_driver.return_value.name = "Kobernulf Monnur"
-
+    @patch('racedata.RaceData.RaceData._get_drivers')
+    @patch('racedata.RaceData.RaceData._to_hash')
+    def test_property_classification(self, mock_to_hash, mock_get_drivers):
+        from racedata.TelemetryDataPacket import ParticipantInfo
+        mock_participant_info = MagicMock(spec=ParticipantInfo)
         mock_participant_info.race_position = 1
 
-        mock_packet.return_value.num_participants = 1
-        mock_packet.return_value.name = [mock_driver]
-        mock_packet.return_value.participant_info = [mock_participant_info]
-        mock_packet.return_value.viewed_participant_index = 0
-        mock_packet_instance = mock_packet.return_value
+        from racedata.TelemetryDataPacket import TelemetryDataPacket
+        mock_packet = MagicMock(spec=TelemetryDataPacket)
+        mock_packet.num_participants = 1
+        mock_packet.participant_info = [mock_participant_info]
+        mock_packet.viewed_participant_index = 0
+        mock_to_hash.return_value = mock_packet
 
-        mock_data = MagicMock()
-        mock_data.packet_count = 1
-        mock_data.__next__.return_value = mock_packet_instance
+        from racedata.RaceData import Driver
+        mock_driver = MagicMock(spec=Driver)
+        mock_driver.index = 0
 
-        mock_telemetry_data.return_value = mock_data
-
-        mock_participant_packet = MagicMock()
-        mock_participant_packet.packet_type = 1
-        mock_participant_packet.name = ["Kobernulf Monnur"]
-
-        mock_tee.return_value = (iter([mock_participant_packet]), None)
-
-        mock_json.load.return_value = {'race_start': hash(mock_packet_instance)}
-
-        mock_entry = MagicMock(spec=ClassificationEntry)
-        mock_entry._race_position = 1
-        mock_entry._driver = mock_driver
-        mock_entry._viewed_driver = True
-
-        mock_classification_entry.return_value = mock_entry
+        mock_get_drivers.return_value = {'Kobernulf Monnur': mock_driver}
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m):
+        with patch('racedata.RaceData.TelemetryData'), \
+                patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.os'), \
+                patch('racedata.RaceData.json.load'):
             instance = RaceData(sentinel.directory)
 
-        expected_result = frozenset({mock_entry})
+        from racedata.RaceData import ClassificationEntry
+        expected_result = {ClassificationEntry(1, mock_driver, True)}
         self.assertSetEqual(instance.classification, expected_result)
-
 
     @patch('racedata.RaceData.StartingGridEntry')
     @patch('racedata.RaceData.Driver')
