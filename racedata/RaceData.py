@@ -141,11 +141,39 @@ class RaceData:
                         = current_drivers[key].index
 
             # self._track = Track(self._packet.track_length)
-            # self._add_sector_times(self._packet)
+            self._add_sector_times(self._packet)
             self._calc_elapsed_time()
 
             if at_time is None or self._elapsed_time >= at_time:
                 return self._packet
+
+    def _add_sector_times(self, packet):
+        for index, participant_info in enumerate(
+                packet.participant_info[:packet.num_participants]):
+            driver_name = None
+            for driver in self._current_drivers.values():
+                if driver.index == index:
+                    driver_name = driver.name
+
+            if participant_info.sector == 1:
+                sector = 3
+            elif participant_info.sector == 2:
+                # STOP DETECTION
+                sector = 1
+            elif participant_info.sector == 3:
+                sector = 2
+            else:
+                # TODO: Investigate invalid sector number.
+                raise ValueError("Invalid Sector Number")
+
+            # Pit Entry / Exit
+
+            sector_time = SectorTime(
+                participant_info.last_sector_time,
+                sector,
+                participant_info.lap_invalidated)
+
+            self._current_drivers[driver_name].add_sector_time(sector_time)
 
     @staticmethod
     def _build_descriptor(telemetry_directory, descriptor_filename):
@@ -373,7 +401,132 @@ class Driver:
     def __init__(self, index, name):
         self.index = index
         self.name = name
-        self.lap_times = []
+
+        self._sector_times = list()
+
+        self._invalidate_next_sector_count = 0
+
+    @property
+    def best_lap(self):
+        valid_laps = list()
+        for invalid, time in zip(self._lap_invalid(), self.lap_times):
+            if not invalid:
+                valid_laps.append(time)
+
+        try:
+            return min(valid_laps)
+        except ValueError:
+            return None
+
+    @property
+    def best_sector_1(self):
+        return self._best_sector(1)
+
+    @property
+    def best_sector_2(self):
+        return self._best_sector(2)
+
+    @property
+    def best_sector_3(self):
+        return self._best_sector(3)
+
+    @property
+    def laps_complete(self):
+        return len(self.lap_times)
+
+    @property
+    def lap_times(self):
+        # Check to see if the first sector is sector 1. Trim if not.
+        sector_times = self._trim_sector_times()
+
+        times = [sector.time for sector in sector_times]
+        lap_times = list()
+        for lap in zip(*[iter(times)]*3):
+            lap_times.append(sum(lap))
+
+        return lap_times
+
+    @property
+    def race_time(self):
+        return sum(self.lap_times)
+
+    @property
+    def sector_times(self):
+        return [sector.time for sector in self._sector_times]
+
+    def add_sector_time(self, sector_time):
+        if sector_time.time == -123.0:
+            pass
+        elif len(self._sector_times) == 0:
+            self._sector_times.append(sector_time)
+        elif self._sector_times[-1] != sector_time:
+            if sector_time.invalid \
+                    and not self._sector_times[-1].invalid \
+                    and self._sector_times[-1].time == sector_time.time \
+                    and self._sector_times[-1].sector == sector_time.sector:
+                self._sector_times[-1] = sector_time
+            elif not sector_time.invalid \
+                    and self._sector_times[-1].invalid \
+                    and self._sector_times[-1].time == sector_time.time \
+                    and self._sector_times[-1].sector == sector_time.sector:
+                pass
+            else:
+                if self._invalidate_next_sector_count > 0:
+                    self._sector_times.append(SectorTime(
+                        sector_time.time,
+                        sector_time.sector,
+                        True))
+                    self._invalidate_next_sector_count -= 1
+                else:
+                    self._sector_times.append(SectorTime(
+                        sector_time.time,
+                        sector_time.sector,
+                        False))
+
+            if sector_time.invalid:
+                self._invalidate_lap(sector_time)
+
+    def _best_sector(self, sector):
+        try:
+            return min([
+                sector_time.time for sector_time in self._sector_times
+                if not sector_time.invalid and sector_time.sector == sector])
+        except ValueError:
+            return None
+
+    def _invalidate_lap(self, sector_time):
+        if sector_time.sector == 3:
+            self._invalidate_next_sector_count = 3
+        elif sector_time.sector == 1:
+            self._invalidate_next_sector_count = 2
+            for sector in self._sector_times[-1:]:
+                sector.invalid = True
+        elif sector_time.sector == 2:
+            self._invalidate_next_sector_count = 1
+            for sector in self._sector_times[-2:]:
+                sector.invalid = True
+        else:
+            raise ValueError("Invalid Sector Number")
+
+    def _lap_invalid(self):
+        sector_times = self._trim_sector_times()
+
+        invalids = [sector.invalid for sector in sector_times]
+        lap_validity = list()
+        for lap in zip(*[iter(invalids)] * 3):
+            lap_validity.append(any(lap))
+
+        return lap_validity
+
+    def _trim_sector_times(self):
+        sector_times = self._sector_times
+        try:
+            while sector_times[0].sector != 1:
+                sector_times = sector_times[1:]
+        except IndexError:
+            pass
+
+        return sector_times
 
     def __repr__(self):
         return "Driver({s.index}, \"{s.name}\")".format(s=self)
@@ -393,6 +546,38 @@ class Driver:
 
     def __hash__(self):
         return hash(self.name)
+
+
+class SectorTime:
+    def __init__(self, time, sector, invalid):
+        self.time = time
+        self.sector = sector
+        self.invalid = bool(invalid)
+
+    def __repr__(self):
+        return "SectorTime({}, {}, {})".format(
+            self.time,
+            self.sector,
+            self.invalid)
+
+    def __str__(self):
+        return "Sector {} Time: {}, Invalid: {}".format(
+            self.sector,
+            self.time,
+            self.invalid)
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return hash(self) == hash(other)
+        return NotImplemented
+
+    def __ne__(self, other):
+        if isinstance(other, self.__class__):
+            return not hash(self) == hash(other)
+        return NotImplemented
+
+    def __hash__(self):
+        return hash((self.time, self.sector, self.invalid))
 
 
 class StartingGridEntry:

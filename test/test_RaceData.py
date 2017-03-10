@@ -7,7 +7,7 @@ from unittest import mock
 from unittest.mock import MagicMock, mock_open, patch, sentinel
 
 from racedata.RaceData import ClassificationEntry, Driver, RaceData, \
-    StartingGridEntry, TelemetryData
+    SectorTime, StartingGridEntry, TelemetryData
 
 
 class TestRaceData(unittest.TestCase):
@@ -537,10 +537,13 @@ class TestRaceData(unittest.TestCase):
 
     @patch('racedata.RaceData.RaceData._get_drivers')
     @patch('racedata.RaceData.RaceData._to_hash')
-    def test_method_get_data(self, mock_to_hash, mock_get_drivers):
+    def test_method_get_all_data(self, mock_to_hash, mock_get_drivers):
         from racedata.TelemetryDataPacket import ParticipantInfo
         mock_participant_info = MagicMock(spec=ParticipantInfo)
         mock_participant_info.race_position = 1
+        mock_participant_info.sector = 1
+        mock_participant_info.last_sector_time = 42.0
+        mock_participant_info.lap_invalidated = False
 
         from racedata.TelemetryDataPacket import TelemetryDataPacket
         mock_packet_1 = MagicMock(spec=TelemetryDataPacket)
@@ -559,21 +562,116 @@ class TestRaceData(unittest.TestCase):
         mock_driver = MagicMock(spec=Driver)
         mock_driver.index = 0
         mock_driver.lap_times = list()
+        mock_driver.name = 'Kobernulf Monnur'
 
         mock_get_drivers.return_value = {'Kobernulf Monnur': mock_driver}
 
         m = mock_open()
         with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.SectorTime') as mock_sector_time, \
+                patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.os'), \
+                patch('racedata.RaceData.json.load'):
+            mock_telemetry_data.return_value.__next__.side_effect \
+                = [mock_packet_2, StopIteration]
+            mock_telemetry_data.return_value.packet_count = 10
+            mock_sector_time.return_value = 42.0
+            instance = RaceData(sentinel.directory)
+
+        _ = instance.get_all_data()
+
+    @patch('racedata.RaceData.RaceData._get_drivers')
+    @patch('racedata.RaceData.RaceData._to_hash')
+    def test_method_get_data(self, mock_to_hash, mock_get_drivers):
+        from racedata.TelemetryDataPacket import ParticipantInfo
+        mock_participant_info = MagicMock(spec=ParticipantInfo)
+        mock_participant_info.race_position = 1
+        mock_participant_info.sector = 1
+        mock_participant_info.last_sector_time = 42.0
+        mock_participant_info.lap_invalidated = False
+
+        from racedata.TelemetryDataPacket import TelemetryDataPacket
+        mock_packet_1 = MagicMock(spec=TelemetryDataPacket)
+        mock_packet_1.num_participants = 1
+        mock_packet_1.participant_info = [mock_participant_info]
+        mock_packet_1.viewed_participant_index = 0
+        mock_to_hash.return_value = mock_packet_1
+
+        mock_packet_2 = MagicMock(spec=TelemetryDataPacket)
+        mock_packet_2.packet_type = 0
+        mock_packet_2.num_participants = 1
+        mock_packet_2.participant_info = [mock_participant_info]
+        mock_packet_2.viewed_participant_index = 0
+        mock_packet_2.current_time = 0.1
+
+        mock_driver = MagicMock(spec=Driver)
+        mock_driver.index = 0
+        mock_driver.lap_times = list()
+        mock_driver.name = 'Kobernulf Monnur'
+
+        mock_get_drivers.return_value = {'Kobernulf Monnur': mock_driver}
+
+        m = mock_open()
+        with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.SectorTime') as mock_sector_time, \
                 patch('racedata.RaceData.open', m), \
                 patch('racedata.RaceData.os'), \
                 patch('racedata.RaceData.json.load'):
             mock_telemetry_data.return_value.__next__.return_value \
                 = mock_packet_2
+            mock_sector_time.return_value = 42.0
             instance = RaceData(sentinel.directory)
 
         from racedata.TelemetryDataPacket import TelemetryDataPacket
         expected_result = TelemetryDataPacket
         self.assertIsInstance(instance.get_data(), expected_result)
+
+    @patch('racedata.RaceData.RaceData._get_drivers')
+    @patch('racedata.RaceData.RaceData._to_hash')
+    def test_method_get_data_invalid_sector(
+            self,
+            mock_to_hash,
+            mock_get_drivers):
+        from racedata.TelemetryDataPacket import ParticipantInfo
+        mock_participant_info = MagicMock(spec=ParticipantInfo)
+        mock_participant_info.race_position = 1
+        mock_participant_info.last_sector_time = 42.0
+        mock_participant_info.lap_invalidated = False
+
+        from racedata.TelemetryDataPacket import TelemetryDataPacket
+        mock_packet_1 = MagicMock(spec=TelemetryDataPacket)
+        mock_packet_1.num_participants = 1
+        mock_packet_1.participant_info = [mock_participant_info]
+        mock_packet_1.viewed_participant_index = 0
+        mock_to_hash.return_value = mock_packet_1
+
+        mock_packet_2 = MagicMock(spec=TelemetryDataPacket)
+        mock_packet_2.packet_type = 0
+        mock_packet_2.num_participants = 1
+        mock_packet_2.participant_info = [mock_participant_info]
+        mock_packet_2.viewed_participant_index = 0
+        mock_packet_2.current_time = 0.1
+
+        mock_driver = MagicMock(spec=Driver)
+        mock_driver.index = 0
+        mock_driver.lap_times = list()
+        mock_driver.name = 'Kobernulf Monnur'
+
+        mock_get_drivers.return_value = {'Kobernulf Monnur': mock_driver}
+
+        m = mock_open()
+        with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.SectorTime') as mock_sector_time, \
+                patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.os'), \
+                patch('racedata.RaceData.json.load'):
+            mock_telemetry_data.return_value.__next__.return_value \
+                = mock_packet_2
+            mock_sector_time.return_value = 42.0
+            instance = RaceData(sentinel.directory)
+
+        with self.assertRaises(ValueError):
+            _ = instance.get_data()
 
     @patch('racedata.RaceData.RaceData._get_drivers')
     @patch('racedata.RaceData.RaceData._to_hash')
@@ -584,6 +682,9 @@ class TestRaceData(unittest.TestCase):
         from racedata.TelemetryDataPacket import ParticipantInfo
         mock_participant_info = MagicMock(spec=ParticipantInfo)
         mock_participant_info.race_position = 1
+        mock_participant_info.sector = 2
+        mock_participant_info.last_sector_time = 42.0
+        mock_participant_info.lap_invalidated = False
 
         from racedata.TelemetryDataPacket import TelemetryDataPacket
         mock_packet_1 = MagicMock(spec=TelemetryDataPacket)
@@ -602,16 +703,19 @@ class TestRaceData(unittest.TestCase):
         mock_driver = MagicMock(spec=Driver)
         mock_driver.index = 0
         mock_driver.lap_times = list()
+        mock_driver.name = 'Kobernulf Monnur'
 
         mock_get_drivers.return_value = {'Kobernulf Monnur': mock_driver}
 
         m = mock_open()
         with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.SectorTime') as mock_sector_time, \
                 patch('racedata.RaceData.open', m), \
                 patch('racedata.RaceData.os'), \
                 patch('racedata.RaceData.json.load'):
             mock_telemetry_data.return_value.__next__.return_value \
                 = mock_packet_2
+            mock_sector_time.return_value = 42.0
             instance = RaceData(sentinel.directory)
 
         from racedata.TelemetryDataPacket import TelemetryDataPacket
@@ -663,6 +767,9 @@ class TestRaceData(unittest.TestCase):
         from racedata.TelemetryDataPacket import ParticipantInfo
         mock_participant_info = MagicMock(spec=ParticipantInfo)
         mock_participant_info.race_position = 1
+        mock_participant_info.sector = 3
+        mock_participant_info.last_sector_time = 42.0
+        mock_participant_info.lap_invalidated = False
 
         from racedata.TelemetryDataPacket import TelemetryDataPacket
         mock_packet_1 = MagicMock(spec=TelemetryDataPacket)
@@ -681,6 +788,7 @@ class TestRaceData(unittest.TestCase):
         mock_driver_1 = MagicMock(spec=Driver)
         mock_driver_1.index = 0
         mock_driver_1.lap_times = list()
+        mock_driver_1.name = 'Kobernulf Monnur'
 
         mock_driver_2 = MagicMock(spec=Driver)
         mock_driver_2.index = 1
@@ -692,11 +800,13 @@ class TestRaceData(unittest.TestCase):
 
         m = mock_open()
         with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.SectorTime') as mock_sector_time, \
                 patch('racedata.RaceData.open', m), \
                 patch('racedata.RaceData.os'), \
                 patch('racedata.RaceData.json.load'):
             mock_telemetry_data.return_value.__next__.return_value \
                 = mock_packet_2
+            mock_sector_time.return_value = 42.0
             instance = RaceData(sentinel.directory)
 
         from racedata.TelemetryDataPacket import TelemetryDataPacket
@@ -712,6 +822,9 @@ class TestRaceData(unittest.TestCase):
         from racedata.TelemetryDataPacket import ParticipantInfo
         mock_participant_info = MagicMock(spec=ParticipantInfo)
         mock_participant_info.race_position = 1
+        mock_participant_info.sector = 3
+        mock_participant_info.last_sector_time = 42.0
+        mock_participant_info.lap_invalidated = False
 
         from racedata.TelemetryDataPacket import TelemetryDataPacket
         mock_packet_1 = MagicMock(spec=TelemetryDataPacket)
@@ -734,6 +847,7 @@ class TestRaceData(unittest.TestCase):
         mock_driver_2 = MagicMock(spec=Driver)
         mock_driver_2.index = 0
         mock_driver_2.lap_times = list()
+        mock_driver_2.name = 'Testy McTest'
 
         mock_get_drivers.side_effect = [
             {'Testy McTest': mock_driver_2, 'Kobernulf Monnur': mock_driver_1},
@@ -741,11 +855,13 @@ class TestRaceData(unittest.TestCase):
 
         m = mock_open()
         with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.SectorTime') as mock_sector_time, \
                 patch('racedata.RaceData.open', m), \
                 patch('racedata.RaceData.os'), \
                 patch('racedata.RaceData.json.load'):
             mock_telemetry_data.return_value.__next__.return_value \
                 = mock_packet_2
+            mock_sector_time.return_value = 42.0
             instance = RaceData(sentinel.directory)
 
         from racedata.TelemetryDataPacket import TelemetryDataPacket
@@ -1211,6 +1327,394 @@ class TestDriver(unittest.TestCase):
         expected_result = Driver
         self.assertIsInstance(instance, expected_result)
 
+    def test_property_best_lap(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 11.0
+        mock_sector_time_1.sector = 1
+        mock_sector_time_1.invalid = False
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 79.0
+        mock_sector_time_2.sector = 2
+        mock_sector_time_2.invalid = False
+
+        mock_sector_time_3 = MagicMock(spec=SectorTime)
+        mock_sector_time_3.time = 42.0
+        mock_sector_time_3.sector = 3
+        mock_sector_time_3.invalid = False
+
+        mock_sector_time_4 = MagicMock(spec=SectorTime)
+        mock_sector_time_4.time = 12.0
+        mock_sector_time_4.sector = 1
+        mock_sector_time_4.invalid = False
+
+        mock_sector_time_5 = MagicMock(spec=SectorTime)
+        mock_sector_time_5.time = 79.0
+        mock_sector_time_5.sector = 2
+        mock_sector_time_5.invalid = False
+
+        mock_sector_time_6 = MagicMock(spec=SectorTime)
+        mock_sector_time_6.time = 42.0
+        mock_sector_time_6.sector = 3
+        mock_sector_time_6.invalid = False
+
+        instance._sector_times = [
+            mock_sector_time_1,
+            mock_sector_time_2,
+            mock_sector_time_3,
+            mock_sector_time_4,
+            mock_sector_time_5,
+            mock_sector_time_6]
+
+        expected_result = sum([11.0, 79.0, 42.0])
+        self.assertEqual(instance.best_lap, expected_result)
+
+    def test_property_best_lap_invalid(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 11.0
+        mock_sector_time_1.sector = 1
+        mock_sector_time_1.invalid = False
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 79.0
+        mock_sector_time_2.sector = 2
+        mock_sector_time_2.invalid = False
+
+        mock_sector_time_3 = MagicMock(spec=SectorTime)
+        mock_sector_time_3.time = 42.0
+        mock_sector_time_3.sector = 3
+        mock_sector_time_3.invalid = False
+
+        mock_sector_time_4 = MagicMock(spec=SectorTime)
+        mock_sector_time_4.time = 2.0
+        mock_sector_time_4.sector = 1
+        mock_sector_time_4.invalid = True
+
+        mock_sector_time_5 = MagicMock(spec=SectorTime)
+        mock_sector_time_5.time = 79.0
+        mock_sector_time_5.sector = 2
+        mock_sector_time_5.invalid = False
+
+        mock_sector_time_6 = MagicMock(spec=SectorTime)
+        mock_sector_time_6.time = 42.0
+        mock_sector_time_6.sector = 3
+        mock_sector_time_6.invalid = False
+
+        instance._sector_times = [
+            mock_sector_time_1,
+            mock_sector_time_2,
+            mock_sector_time_3,
+            mock_sector_time_4,
+            mock_sector_time_5,
+            mock_sector_time_6]
+
+        expected_result = sum([11.0, 79.0, 42.0])
+        self.assertEqual(instance.best_lap, expected_result)
+
+    def test_property_best_lap_no_laps(self):
+        instance = Driver(sentinel.index, sentinel.name)
+        self.assertIsNone(instance.best_lap)
+
+    def test_property_best_sector_1(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 11.0
+        mock_sector_time_1.sector = 2
+        mock_sector_time_1.invalid = False
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 79.0
+        mock_sector_time_2.sector = 1
+        mock_sector_time_2.invalid = False
+
+        mock_sector_time_3 = MagicMock(spec=SectorTime)
+        mock_sector_time_3.time = 42.0
+        mock_sector_time_3.sector = 1
+        mock_sector_time_3.invalid = False
+
+        instance._sector_times = [
+            mock_sector_time_1,
+            mock_sector_time_2,
+            mock_sector_time_3]
+
+        expected_result = 42.0
+        self.assertEqual(instance.best_sector_1, expected_result)
+
+    def test_property_best_sector_1_invalid(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 11.0
+        mock_sector_time_1.sector = 2
+        mock_sector_time_1.invalid = False
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 79.0
+        mock_sector_time_2.sector = 1
+        mock_sector_time_2.invalid = False
+
+        mock_sector_time_3 = MagicMock(spec=SectorTime)
+        mock_sector_time_3.time = 42.0
+        mock_sector_time_3.sector = 1
+        mock_sector_time_3.invalid = True
+
+        instance._sector_times = [
+            mock_sector_time_1,
+            mock_sector_time_2,
+            mock_sector_time_3]
+
+        expected_result = 79.0
+        self.assertEqual(instance.best_sector_1, expected_result)
+
+    def test_property_best_sector_1_no_sectors(self):
+        instance = Driver(sentinel.index, sentinel.name)
+        self.assertIsNone(instance.best_sector_1)
+
+    def test_property_best_sector_2(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 11.0
+        mock_sector_time_1.sector = 3
+        mock_sector_time_1.invalid = False
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 79.0
+        mock_sector_time_2.sector = 2
+        mock_sector_time_2.invalid = False
+
+        mock_sector_time_3 = MagicMock(spec=SectorTime)
+        mock_sector_time_3.time = 42.0
+        mock_sector_time_3.sector = 2
+        mock_sector_time_3.invalid = False
+
+        instance._sector_times = [
+            mock_sector_time_1,
+            mock_sector_time_2,
+            mock_sector_time_3]
+
+        expected_result = 42.0
+        self.assertEqual(instance.best_sector_2, expected_result)
+
+    def test_property_best_sector_2_invalid(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 11.0
+        mock_sector_time_1.sector = 3
+        mock_sector_time_1.invalid = False
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 79.0
+        mock_sector_time_2.sector = 2
+        mock_sector_time_2.invalid = False
+
+        mock_sector_time_3 = MagicMock(spec=SectorTime)
+        mock_sector_time_3.time = 42.0
+        mock_sector_time_3.sector = 2
+        mock_sector_time_3.invalid = True
+
+        instance._sector_times = [
+            mock_sector_time_1,
+            mock_sector_time_2,
+            mock_sector_time_3]
+
+        expected_result = 79.0
+        self.assertEqual(instance.best_sector_2, expected_result)
+
+    def test_property_best_sector_2_no_sectors(self):
+        instance = Driver(sentinel.index, sentinel.name)
+        self.assertIsNone(instance.best_sector_2)
+
+    def test_property_best_sector_3(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 11.0
+        mock_sector_time_1.sector = 1
+        mock_sector_time_1.invalid = False
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 79.0
+        mock_sector_time_2.sector = 3
+        mock_sector_time_2.invalid = False
+
+        mock_sector_time_3 = MagicMock(spec=SectorTime)
+        mock_sector_time_3.time = 42.0
+        mock_sector_time_3.sector = 3
+        mock_sector_time_3.invalid = False
+
+        instance._sector_times = [
+            mock_sector_time_1,
+            mock_sector_time_2,
+            mock_sector_time_3]
+
+        expected_result = 42.0
+        self.assertEqual(instance.best_sector_3, expected_result)
+
+    def test_property_best_sector_3_invalid(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 11.0
+        mock_sector_time_1.sector = 1
+        mock_sector_time_1.invalid = False
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 79.0
+        mock_sector_time_2.sector = 3
+        mock_sector_time_2.invalid = False
+
+        mock_sector_time_3 = MagicMock(spec=SectorTime)
+        mock_sector_time_3.time = 42.0
+        mock_sector_time_3.sector = 3
+        mock_sector_time_3.invalid = True
+
+        instance._sector_times = [
+            mock_sector_time_1,
+            mock_sector_time_2,
+            mock_sector_time_3]
+
+        expected_result = 79.0
+        self.assertEqual(instance.best_sector_3, expected_result)
+
+    def test_property_best_sector_3_no_sectors(self):
+        instance = Driver(sentinel.index, sentinel.name)
+        self.assertIsNone(instance.best_sector_3)
+
+    def test_property_laps_complete(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 11.0
+        mock_sector_time_1.sector = 1
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 79.0
+        mock_sector_time_2.sector = 2
+
+        mock_sector_time_3 = MagicMock(spec=SectorTime)
+        mock_sector_time_3.time = 42.0
+        mock_sector_time_3.sector = 3
+
+        instance._sector_times = [
+            mock_sector_time_1,
+            mock_sector_time_2,
+            mock_sector_time_3]
+
+        expected_result = 1
+        self.assertEqual(instance.laps_complete, expected_result)
+
+    def test_property_laps_complete_partial(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 11.0
+        mock_sector_time_1.sector = 1
+
+        instance._sector_times = [
+            mock_sector_time_1]
+
+        expected_result = 0
+        self.assertEqual(instance.laps_complete, expected_result)
+
+    def test_property_lap_times(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_garbage = MagicMock(spec=SectorTime)
+        mock_sector_time_garbage.time = 42.0
+        mock_sector_time_garbage.sector = 3
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 11.0
+        mock_sector_time_1.sector = 1
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 79.0
+        mock_sector_time_2.sector = 2
+
+        mock_sector_time_3 = MagicMock(spec=SectorTime)
+        mock_sector_time_3.time = 42.0
+        mock_sector_time_3.sector = 3
+
+        instance._sector_times = [
+            mock_sector_time_garbage,
+            mock_sector_time_1,
+            mock_sector_time_2,
+            mock_sector_time_3]
+
+        expected_result = [sum([11.0, 79.0, 42.0])]
+        self.assertEqual(instance.lap_times, expected_result)
+
+    def test_property_race_time(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 11.0
+        mock_sector_time_1.sector = 1
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 79.0
+        mock_sector_time_2.sector = 2
+
+        mock_sector_time_3 = MagicMock(spec=SectorTime)
+        mock_sector_time_3.time = 42.0
+        mock_sector_time_3.sector = 3
+
+        instance._sector_times = [
+            mock_sector_time_1,
+            mock_sector_time_2,
+            mock_sector_time_3]
+
+        expected_result = sum([11.0, 79.0, 42.0])
+        self.assertEqual(instance.race_time, expected_result)
+
+    def test_property_race_time_partial(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 11.0
+        mock_sector_time_1.sector = 1
+
+        instance._sector_times = [
+            mock_sector_time_1]
+
+        expected_result = 0.000
+        self.assertEqual(instance.race_time, expected_result)
+
+    def test_property_sector_times(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 11.0
+        mock_sector_time_1.sector = 1
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 79.0
+        mock_sector_time_2.sector = 2
+
+        mock_sector_time_3 = MagicMock(spec=SectorTime)
+        mock_sector_time_3.time = 42.0
+        mock_sector_time_3.sector = 3
+
+        instance._sector_times = [
+            mock_sector_time_1,
+            mock_sector_time_2,
+            mock_sector_time_3]
+
+        expected_result = [11.0, 79.0, 42.0]
+        self.assertListEqual(instance.sector_times, expected_result)
+
+    def test_property_sector_times_empty(self):
+        instance = Driver(sentinel.index, sentinel.name)
+        expected_result = list()
+        self.assertListEqual(instance.sector_times, expected_result)
+
     def test_field_index(self):
         instance = Driver(sentinel.index, sentinel.name)
         expected_result = sentinel.index
@@ -1220,6 +1724,166 @@ class TestDriver(unittest.TestCase):
         instance = Driver(sentinel.index, sentinel.name)
         expected_result = sentinel.name
         self.assertEqual(instance.name, expected_result)
+
+    def test_method_add_sector_time_invalid(self):
+        instance = Driver(sentinel.index, sentinel.name)
+        mock_sector_time = MagicMock(spec=SectorTime)
+        mock_sector_time.time = -123.0
+        instance.add_sector_time(mock_sector_time)
+        expected_result = []
+        self.assertListEqual(instance._sector_times, expected_result)
+
+    def test_method_add_sector_time_first(self):
+        instance = Driver(sentinel.index, sentinel.name)
+        mock_sector_time = MagicMock(spec=SectorTime)
+        mock_sector_time.time = 42.0
+        instance.add_sector_time(mock_sector_time)
+        expected_result = [mock_sector_time]
+        self.assertListEqual(instance._sector_times, expected_result)
+
+    def test_method_add_sector_time_invalid_replace_s1(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 42.0
+        mock_sector_time_1.sector = 1
+        mock_sector_time_1.invalid = False
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 42.0
+        mock_sector_time_2.sector = 1
+        mock_sector_time_2.invalid = True
+
+        instance.add_sector_time(mock_sector_time_1)
+        instance.add_sector_time(mock_sector_time_2)
+        expected_result = [mock_sector_time_2]
+        self.assertListEqual(instance._sector_times, expected_result)
+
+    def test_method_add_sector_time_invalid_replace_s2(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 42.0
+        mock_sector_time_1.sector = 2
+        mock_sector_time_1.invalid = False
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 42.0
+        mock_sector_time_2.sector = 2
+        mock_sector_time_2.invalid = True
+
+        instance.add_sector_time(mock_sector_time_1)
+        instance.add_sector_time(mock_sector_time_2)
+        expected_result = [mock_sector_time_2]
+        self.assertListEqual(instance._sector_times, expected_result)
+
+    def test_method_add_sector_time_invalid_replace_s3(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 42.0
+        mock_sector_time_1.sector = 3
+        mock_sector_time_1.invalid = False
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 42.0
+        mock_sector_time_2.sector = 3
+        mock_sector_time_2.invalid = True
+
+        instance.add_sector_time(mock_sector_time_1)
+        instance.add_sector_time(mock_sector_time_2)
+        expected_result = [mock_sector_time_2]
+        self.assertListEqual(instance._sector_times, expected_result)
+
+    def test_method_add_sector_time_invalid_replace_sector_error(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 42.0
+        mock_sector_time_1.sector = 1
+        mock_sector_time_1.invalid = False
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 42.0
+        mock_sector_time_2.sector = 0
+        mock_sector_time_2.invalid = True
+
+        instance.add_sector_time(mock_sector_time_1)
+        with self.assertRaises(ValueError):
+            instance.add_sector_time(mock_sector_time_2)
+
+    def test_method_add_sector_time_valid_no_replace(self):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 42.0
+        mock_sector_time_1.sector = 1
+        mock_sector_time_1.invalid = True
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 42.0
+        mock_sector_time_2.sector = 1
+        mock_sector_time_2.invalid = False
+
+        instance.add_sector_time(mock_sector_time_1)
+        instance.add_sector_time(mock_sector_time_2)
+        expected_result = [mock_sector_time_1]
+        self.assertListEqual(instance._sector_times, expected_result)
+
+    @patch('racedata.RaceData.SectorTime', autospec=True)
+    def test_method_add_sector_time_invalidating(self, mock_sector_time_return):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 42.0
+        mock_sector_time_1.sector = 1
+        mock_sector_time_1.invalid = False
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 11.0
+        mock_sector_time_2.sector = 2
+        mock_sector_time_2.invalid = True
+
+        mock_sector_time_3 = MagicMock(spec=SectorTime)
+        mock_sector_time_3.time = 79.0
+        mock_sector_time_3.sector = 3
+        mock_sector_time_3.invalid = True
+
+        mock_sector_time_return.side_effect = [
+            mock_sector_time_2,
+            mock_sector_time_3]
+
+        instance.add_sector_time(mock_sector_time_1)
+        instance.add_sector_time(mock_sector_time_2)
+        instance.add_sector_time(mock_sector_time_3)
+        expected_result = [
+            mock_sector_time_1,
+            mock_sector_time_2,
+            mock_sector_time_3]
+        self.assertListEqual(instance._sector_times, expected_result)
+        self.assertTrue(all(
+            [sector.invalid for sector in instance._sector_times]))
+
+    @patch('racedata.RaceData.SectorTime', autospec=True)
+    def test_method_add_sector_time(self, mock_sector_time_return):
+        instance = Driver(sentinel.index, sentinel.name)
+
+        mock_sector_time_1 = MagicMock(spec=SectorTime)
+        mock_sector_time_1.time = 42.0
+        mock_sector_time_1.sector = 1
+        mock_sector_time_1.invalid = False
+
+        mock_sector_time_2 = MagicMock(spec=SectorTime)
+        mock_sector_time_2.time = 11.0
+        mock_sector_time_2.sector = 2
+        mock_sector_time_2.invalid = False
+
+        mock_sector_time_return.return_value = mock_sector_time_2
+
+        instance.add_sector_time(mock_sector_time_1)
+        instance.add_sector_time(mock_sector_time_2)
+        expected_result = [mock_sector_time_1, mock_sector_time_2]
+        self.assertListEqual(instance._sector_times, expected_result)
 
     def test_magic_repr(self):
         instance = Driver(sentinel.index, sentinel.name)
@@ -1272,6 +1936,105 @@ class TestDriver(unittest.TestCase):
     def test_magic_hash(self):
         instance = Driver(sentinel.index, sentinel.name)
         expected_result = hash(sentinel.name)
+        self.assertEqual(hash(instance), expected_result)
+
+
+class TestSectorTime(unittest.TestCase):
+    """Unit tests for Driver class.
+
+    """
+    def test_init(self):
+        instance = SectorTime(sentinel.time, sentinel.sector, sentinel.invalid)
+        expected_result = SectorTime
+        self.assertIsInstance(instance, expected_result)
+
+    def test_field_time(self):
+        instance = SectorTime(sentinel.time, sentinel.sector, sentinel.invalid)
+        expected_result = sentinel.time
+        self.assertEqual(instance.time, expected_result)
+
+    def test_field_sector(self):
+        instance = SectorTime(sentinel.time, sentinel.sector, sentinel.invalid)
+        expected_result = sentinel.sector
+        self.assertEqual(instance.sector, expected_result)
+
+    def test_field_invalid(self):
+        instance = SectorTime(sentinel.time, sentinel.sector, sentinel.invalid)
+        expected_result = bool(sentinel.invalid)
+        self.assertEqual(instance.invalid, expected_result)
+
+    def test_magic_repr(self):
+        instance = SectorTime(sentinel.time, sentinel.sector, sentinel.invalid)
+        expected_result = "SectorTime({}, {}, {})".format(
+            sentinel.time,
+            sentinel.sector,
+            bool(sentinel.invalid))
+        self.assertEqual(repr(instance), expected_result)
+
+    def test_magic_str(self):
+        instance = SectorTime(sentinel.time, sentinel.sector, sentinel.invalid)
+        expected_result = "Sector {} Time: {}, Invalid: {}".format(
+            sentinel.sector,
+            sentinel.time,
+            bool(sentinel.invalid))
+        self.assertEqual(str(instance), expected_result)
+
+    def test_magic_eq_true(self):
+        instance_1 = SectorTime(
+            sentinel.time,
+            sentinel.sector,
+            sentinel.invalid)
+        instance_2 = SectorTime(
+            sentinel.time,
+            sentinel.sector,
+            sentinel.invalid)
+        self.assertTrue(instance_1 == instance_2)
+
+    def test_magic_eq_false(self):
+        instance_1 = SectorTime(
+            sentinel.time,
+            sentinel.sector,
+            sentinel.invalid)
+        instance_2 = SectorTime(
+            sentinel.different_time,
+            sentinel.sector,
+            sentinel.invalid)
+        self.assertFalse(instance_1 == instance_2)
+
+    def test_magic_eq_diff_class(self):
+        instance = SectorTime(sentinel.time, sentinel.sector, sentinel.invalid)
+        self.assertFalse(instance == self)
+
+    def test_magic_ne_true(self):
+        instance_1 = SectorTime(
+            sentinel.time,
+            sentinel.sector,
+            sentinel.invalid)
+        instance_2 = SectorTime(
+            sentinel.different_time,
+            sentinel.sector,
+            sentinel.invalid)
+        self.assertTrue(instance_1 != instance_2)
+
+    def test_magic_ne_false(self):
+        instance_1 = SectorTime(
+            sentinel.time,
+            sentinel.sector,
+            sentinel.invalid)
+        instance_2 = SectorTime(
+            sentinel.time,
+            sentinel.sector,
+            sentinel.invalid)
+        self.assertFalse(instance_1 != instance_2)
+
+    def test_magic_ne_diff_class(self):
+        instance = SectorTime(sentinel.time, sentinel.sector, sentinel.invalid)
+        self.assertTrue(instance != self)
+
+    def test_magic_hash(self):
+        instance = SectorTime(sentinel.time, sentinel.sector, sentinel.invalid)
+        expected_result = hash(
+            (sentinel.time, sentinel.sector, bool(sentinel.invalid)))
         self.assertEqual(hash(instance), expected_result)
 
 
