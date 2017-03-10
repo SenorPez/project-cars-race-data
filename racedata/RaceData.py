@@ -80,6 +80,46 @@ class RaceData:
             pass
 
     @property
+    def best_lap(self):
+        try:
+            return min([
+                driver.best_lap for driver
+                in self._current_drivers.values()
+                if driver.best_lap is not None])
+        except ValueError:
+            return None
+
+    @property
+    def best_sector_1(self):
+        try:
+            return min([
+                driver.best_sector_1 for driver
+                in self._current_drivers.values()
+                if driver.best_sector_1 is not None])
+        except ValueError:
+            return None
+
+    @property
+    def best_sector_2(self):
+        try:
+            return min([
+                driver.best_sector_2 for driver
+                in self._current_drivers.values()
+                if driver.best_sector_2 is not None])
+        except ValueError:
+            return None
+
+    @property
+    def best_sector_3(self):
+        try:
+            return min([
+                driver.best_sector_3 for driver
+                in self._current_drivers.values()
+                if driver.best_sector_3 is not None])
+        except ValueError:
+            return None
+
+    @property
     def classification(self):
         drivers_by_index = sorted(
             [driver for driver in self._current_drivers.values()],

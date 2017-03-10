@@ -468,6 +468,159 @@ class TestRaceData(unittest.TestCase):
 
     @patch('racedata.RaceData.RaceData._get_drivers')
     @patch('racedata.RaceData.RaceData._to_hash')
+    def test_property_best_lap(self, *_):
+        mock_driver_1 = MagicMock(spec=Driver)
+        mock_driver_1.best_lap = 42.0
+
+        mock_driver_2 = MagicMock(spec=Driver)
+        mock_driver_2.best_lap = 79.0
+
+        mock_driver_3 = MagicMock(spec=Driver)
+        mock_driver_3.best_lap = None
+
+        m = mock_open()
+        with patch('racedata.RaceData.TelemetryData'), \
+                patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.os'), \
+                patch('racedata.RaceData.json.load'):
+            instance = RaceData(sentinel.directory)
+            instance._current_drivers = {
+                'Kobernulf Monnur': mock_driver_1,
+                'Testy McTest': mock_driver_2,
+                'SenorPez': mock_driver_3}
+
+        expected_result = 42.0
+        self.assertEqual(instance.best_lap, expected_result)
+
+    @patch('racedata.RaceData.RaceData._get_drivers')
+    @patch('racedata.RaceData.RaceData._to_hash')
+    def test_property_best_lap_no_laps(self, *_):
+        pass
+        m = mock_open()
+        with patch('racedata.RaceData.TelemetryData'), \
+                patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.os'), \
+                patch('racedata.RaceData.json.load'):
+            instance = RaceData(sentinel.directory)
+
+        self.assertIsNone(instance.best_lap)
+
+    @patch('racedata.RaceData.RaceData._get_drivers')
+    @patch('racedata.RaceData.RaceData._to_hash')
+    def test_property_best_sector_1(self, *_):
+        mock_driver_1 = MagicMock(spec=Driver)
+        mock_driver_1.best_sector_1 = 42.0
+
+        mock_driver_2 = MagicMock(spec=Driver)
+        mock_driver_2.best_sector_1 = 79.0
+
+        mock_driver_3 = MagicMock(spec=Driver)
+        mock_driver_3.best_sector_1 = None
+
+        m = mock_open()
+        with patch('racedata.RaceData.TelemetryData'), \
+                patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.os'), \
+                patch('racedata.RaceData.json.load'):
+            instance = RaceData(sentinel.directory)
+            instance._current_drivers = {
+                'Kobernulf Monnur': mock_driver_1,
+                'Testy McTest': mock_driver_2,
+                'SenorPez': mock_driver_3}
+
+        expected_result = 42.0
+        self.assertEqual(instance.best_sector_1, expected_result)
+
+    @patch('racedata.RaceData.RaceData._get_drivers')
+    @patch('racedata.RaceData.RaceData._to_hash')
+    def test_property_best_sector_1_no_laps(self, *_):
+        m = mock_open()
+        with patch('racedata.RaceData.TelemetryData'), \
+                patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.os'), \
+                patch('racedata.RaceData.json.load'):
+            instance = RaceData(sentinel.directory)
+
+        self.assertIsNone(instance.best_sector_1)
+
+    @patch('racedata.RaceData.RaceData._get_drivers')
+    @patch('racedata.RaceData.RaceData._to_hash')
+    def test_property_best_sector_2(self, *_):
+        mock_driver_1 = MagicMock(spec=Driver)
+        mock_driver_1.best_sector_2 = 42.0
+
+        mock_driver_2 = MagicMock(spec=Driver)
+        mock_driver_2.best_sector_2 = 79.0
+
+        mock_driver_3 = MagicMock(spec=Driver)
+        mock_driver_3.best_sector_2 = None
+
+        m = mock_open()
+        with patch('racedata.RaceData.TelemetryData'), \
+                patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.os'), \
+                patch('racedata.RaceData.json.load'):
+            instance = RaceData(sentinel.directory)
+            instance._current_drivers = {
+                'Kobernulf Monnur': mock_driver_1,
+                'Testy McTest': mock_driver_2,
+                'SenorPez': mock_driver_3}
+
+        expected_result = 42.0
+        self.assertEqual(instance.best_sector_2, expected_result)
+
+    @patch('racedata.RaceData.RaceData._get_drivers')
+    @patch('racedata.RaceData.RaceData._to_hash')
+    def test_property_best_sector_2_no_laps(self, *_):
+        m = mock_open()
+        with patch('racedata.RaceData.TelemetryData'), \
+                patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.os'), \
+                patch('racedata.RaceData.json.load'):
+            instance = RaceData(sentinel.directory)
+
+        self.assertIsNone(instance.best_sector_2)
+
+    @patch('racedata.RaceData.RaceData._get_drivers')
+    @patch('racedata.RaceData.RaceData._to_hash')
+    def test_property_best_sector_3(self, *_):
+        mock_driver_1 = MagicMock(spec=Driver)
+        mock_driver_1.best_sector_3 = 42.0
+
+        mock_driver_2 = MagicMock(spec=Driver)
+        mock_driver_2.best_sector_3 = 79.0
+
+        mock_driver_3 = MagicMock(spec=Driver)
+        mock_driver_3.best_sector_3 = None
+
+        m = mock_open()
+        with patch('racedata.RaceData.TelemetryData'), \
+                patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.os'), \
+                patch('racedata.RaceData.json.load'):
+            instance = RaceData(sentinel.directory)
+            instance._current_drivers = {
+                'Kobernulf Monnur': mock_driver_1,
+                'Testy McTest': mock_driver_2,
+                'SenorPez': mock_driver_3}
+
+        expected_result = 42.0
+        self.assertEqual(instance.best_sector_3, expected_result)
+
+    @patch('racedata.RaceData.RaceData._get_drivers')
+    @patch('racedata.RaceData.RaceData._to_hash')
+    def test_property_best_sector_3_no_laps(self, *_):
+        m = mock_open()
+        with patch('racedata.RaceData.TelemetryData'), \
+                patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.os'), \
+                patch('racedata.RaceData.json.load'):
+            instance = RaceData(sentinel.directory)
+
+        self.assertIsNone(instance.best_sector_3)
+
+    @patch('racedata.RaceData.RaceData._get_drivers')
+    @patch('racedata.RaceData.RaceData._to_hash')
     def test_property_classification(self, mock_to_hash, mock_get_drivers):
         from racedata.TelemetryDataPacket import ParticipantInfo
         mock_participant_info = MagicMock(spec=ParticipantInfo)
