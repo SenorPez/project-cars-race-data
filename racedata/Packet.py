@@ -56,7 +56,7 @@ class Packet(object):
     def __repr__(self):
         return self.__str__()
 
-    def __str__(self):
+    def __str__(self): # pragma: no cover
         raise NotImplementedError
 
     def __eq__(self, other):

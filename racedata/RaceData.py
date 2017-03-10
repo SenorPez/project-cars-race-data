@@ -6,6 +6,7 @@ import json
 import os
 from glob import glob
 from itertools import tee
+from math import ceil
 
 from natsort import natsorted
 from tqdm import tqdm
@@ -66,6 +67,9 @@ class RaceData:
 
             self._track = None
             self._elapsed_time = None
+
+            self.laps_in_event, self.total_time = self._detect_race_length(
+                self._packet, telemetry_directory)
 
             drivers_by_index = sorted(
                 [driver for driver in self._current_drivers.values()],
@@ -132,6 +136,22 @@ class RaceData:
             for index, participant_info
             in enumerate(self._packet.participant_info)
             if index < self._packet.num_participants])
+
+    @property
+    def current_lap(self):
+        leader_lap = max([
+            participant.current_lap for participant
+            in self._packet.participant_info])
+        return leader_lap if self.laps_in_event is None \
+            else min(leader_lap, self.laps_in_event)
+
+    @property
+    def current_time(self):
+        return self._packet.current_time
+
+    @property
+    def event_time_remaining(self):
+        return self._packet.event_time_remaining
 
     def get_all_data(self):
         progress = tqdm(
@@ -347,6 +367,32 @@ class RaceData:
                 if driver.index == self._packet.viewed_participant_index)
             self._elapsed_time = \
                 sum(driver.lap_times) + self._packet.current_time
+
+    @staticmethod
+    def _detect_race_length(packet, telemetry_directory):
+        laps_in_event = packet.laps_in_event
+        if laps_in_event == 0:
+            laps_in_event = None
+            telemetry_data = TelemetryData(telemetry_directory)
+            progress = tqdm(
+                desc='Detecting Race Length',
+                total=telemetry_data.packet_count,
+                unit='packets')
+            packet = next(telemetry_data)
+            while (packet.packet_type == 0 and packet.race_state == 1) \
+                    or packet.packet_type != 0:
+                try:
+                    progress.update()
+                    packet = next(telemetry_data)
+                except StopIteration:
+                    break
+
+            progress.close()
+            total_time = ceil(packet.event_time_remaining)
+        else:
+            total_time = None
+
+        return laps_in_event, total_time
 
     @staticmethod
     def _get_drivers(telemetry_data, count):
