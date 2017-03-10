@@ -7,7 +7,7 @@ from unittest import mock
 from unittest.mock import MagicMock, mock_open, patch, sentinel
 
 from racedata.RaceData import ClassificationEntry, Driver, RaceData, \
-    SectorTime, StartingGridEntry, TelemetryData
+    SectorTime, StartingGridEntry, TelemetryData, Track
 
 
 class TestRaceData(unittest.TestCase):
@@ -15,6 +15,7 @@ class TestRaceData(unittest.TestCase):
 
     """
     @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -46,6 +47,7 @@ class TestRaceData(unittest.TestCase):
         self.assertIsInstance(instance, expected_result)
 
     @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -88,6 +90,7 @@ class TestRaceData(unittest.TestCase):
         self.assertIsInstance(instance, expected_result)
 
     @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.json')
@@ -165,6 +168,7 @@ class TestRaceData(unittest.TestCase):
         self.assertIsInstance(instance, expected_result)
 
     @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.json')
     @patch('racedata.RaceData.os')
@@ -249,6 +253,7 @@ class TestRaceData(unittest.TestCase):
         self.assertIsInstance(instance, expected_result)
 
     @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.json')
@@ -333,6 +338,7 @@ class TestRaceData(unittest.TestCase):
         self.assertIsInstance(instance, expected_result)
 
     @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.json')
@@ -427,6 +433,7 @@ class TestRaceData(unittest.TestCase):
         self.assertIsInstance(instance, expected_result)
 
     @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -508,6 +515,7 @@ class TestRaceData(unittest.TestCase):
             with self.assertRaises(ValueError):
                 _ = RaceData(sentinel.directory)
 
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.RaceData._get_drivers')
     @patch('racedata.RaceData.RaceData._to_hash')
     def test_property_best_lap(self, *_):
@@ -534,6 +542,7 @@ class TestRaceData(unittest.TestCase):
         expected_result = 42.0
         self.assertEqual(instance.best_lap, expected_result)
 
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.RaceData._get_drivers')
     @patch('racedata.RaceData.RaceData._to_hash')
     def test_property_best_lap_no_laps(self, *_):
@@ -547,6 +556,7 @@ class TestRaceData(unittest.TestCase):
 
         self.assertIsNone(instance.best_lap)
 
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.RaceData._get_drivers')
     @patch('racedata.RaceData.RaceData._to_hash')
     def test_property_best_sector_1(self, *_):
@@ -573,6 +583,7 @@ class TestRaceData(unittest.TestCase):
         expected_result = 42.0
         self.assertEqual(instance.best_sector_1, expected_result)
 
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.RaceData._get_drivers')
     @patch('racedata.RaceData.RaceData._to_hash')
     def test_property_best_sector_1_no_laps(self, *_):
@@ -585,6 +596,7 @@ class TestRaceData(unittest.TestCase):
 
         self.assertIsNone(instance.best_sector_1)
 
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.RaceData._get_drivers')
     @patch('racedata.RaceData.RaceData._to_hash')
     def test_property_best_sector_2(self, *_):
@@ -611,6 +623,7 @@ class TestRaceData(unittest.TestCase):
         expected_result = 42.0
         self.assertEqual(instance.best_sector_2, expected_result)
 
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.RaceData._get_drivers')
     @patch('racedata.RaceData.RaceData._to_hash')
     def test_property_best_sector_2_no_laps(self, *_):
@@ -623,6 +636,7 @@ class TestRaceData(unittest.TestCase):
 
         self.assertIsNone(instance.best_sector_2)
 
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.RaceData._get_drivers')
     @patch('racedata.RaceData.RaceData._to_hash')
     def test_property_best_sector_3(self, *_):
@@ -649,6 +663,7 @@ class TestRaceData(unittest.TestCase):
         expected_result = 42.0
         self.assertEqual(instance.best_sector_3, expected_result)
 
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.RaceData._get_drivers')
     @patch('racedata.RaceData.RaceData._to_hash')
     def test_property_best_sector_3_no_laps(self, *_):
@@ -678,6 +693,7 @@ class TestRaceData(unittest.TestCase):
         mock_packet.num_participants = 1
         mock_packet.participant_info = [mock_participant_info]
         mock_packet.viewed_participant_index = 0
+        mock_packet.track_length = 1
         mock_to_hash.return_value = mock_packet
 
         mock_driver = MagicMock(spec=Driver)
@@ -689,6 +705,7 @@ class TestRaceData(unittest.TestCase):
 
         m = mock_open()
         with patch('racedata.RaceData.TelemetryData'), \
+                patch('racedata.RaceData.Track'), \
                 patch('racedata.RaceData.open', m), \
                 patch('racedata.RaceData.os'), \
                 patch('racedata.RaceData.json.load'):
@@ -715,6 +732,7 @@ class TestRaceData(unittest.TestCase):
         mock_packet.num_participants = 1
         mock_packet.participant_info = [mock_participant_info]
         mock_packet.viewed_participant_index = 0
+        mock_packet.track_length = 1
         mock_to_hash.return_value = mock_packet
 
         mock_driver = MagicMock(spec=Driver)
@@ -726,6 +744,7 @@ class TestRaceData(unittest.TestCase):
 
         m = mock_open()
         with patch('racedata.RaceData.TelemetryData'), \
+                patch('racedata.RaceData.Track'), \
                 patch('racedata.RaceData.open', m), \
                 patch('racedata.RaceData.os'), \
                 patch('racedata.RaceData.json.load'):
@@ -752,6 +771,7 @@ class TestRaceData(unittest.TestCase):
         mock_packet.num_participants = 1
         mock_packet.participant_info = [mock_participant_info]
         mock_packet.viewed_participant_index = 0
+        mock_packet.track_length = 1
         mock_to_hash.return_value = mock_packet
 
         mock_driver = MagicMock(spec=Driver)
@@ -763,6 +783,7 @@ class TestRaceData(unittest.TestCase):
 
         m = mock_open()
         with patch('racedata.RaceData.TelemetryData'), \
+                patch('racedata.RaceData.Track'), \
                 patch('racedata.RaceData.open', m), \
                 patch('racedata.RaceData.os'), \
                 patch('racedata.RaceData.json.load'):
@@ -789,6 +810,7 @@ class TestRaceData(unittest.TestCase):
         mock_packet.num_participants = 1
         mock_packet.participant_info = [mock_participant_info]
         mock_packet.viewed_participant_index = 0
+        mock_packet.track_length = 1
         mock_to_hash.return_value = mock_packet
 
         mock_driver = MagicMock(spec=Driver)
@@ -800,6 +822,7 @@ class TestRaceData(unittest.TestCase):
 
         m = mock_open()
         with patch('racedata.RaceData.TelemetryData'), \
+                patch('racedata.RaceData.Track'), \
                 patch('racedata.RaceData.open', m), \
                 patch('racedata.RaceData.os'), \
                 patch('racedata.RaceData.json.load'):
@@ -826,6 +849,7 @@ class TestRaceData(unittest.TestCase):
         mock_packet.participant_info = [mock_participant_info]
         mock_packet.viewed_participant_index = 0
         mock_packet.current_time = 42.0
+        mock_packet.track_length = 1
         mock_to_hash.return_value = mock_packet
 
         mock_driver = MagicMock(spec=Driver)
@@ -837,6 +861,7 @@ class TestRaceData(unittest.TestCase):
 
         m = mock_open()
         with patch('racedata.RaceData.TelemetryData'), \
+                patch('racedata.RaceData.Track'), \
                 patch('racedata.RaceData.open', m), \
                 patch('racedata.RaceData.os'), \
                 patch('racedata.RaceData.json.load'):
@@ -863,6 +888,7 @@ class TestRaceData(unittest.TestCase):
         mock_packet.participant_info = [mock_participant_info]
         mock_packet.viewed_participant_index = 0
         mock_packet.event_time_remaining = 42.0
+        mock_packet.track_length = 1
         mock_to_hash.return_value = mock_packet
 
         mock_driver = MagicMock(spec=Driver)
@@ -874,6 +900,7 @@ class TestRaceData(unittest.TestCase):
 
         m = mock_open()
         with patch('racedata.RaceData.TelemetryData'), \
+                patch('racedata.RaceData.Track'), \
                 patch('racedata.RaceData.open', m), \
                 patch('racedata.RaceData.os'), \
                 patch('racedata.RaceData.json.load'):
@@ -883,6 +910,7 @@ class TestRaceData(unittest.TestCase):
         self.assertEqual(instance.event_time_remaining, expected_result)
 
     @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -942,6 +970,7 @@ class TestRaceData(unittest.TestCase):
         mock_packet_1.num_participants = 1
         mock_packet_1.participant_info = [mock_participant_info]
         mock_packet_1.viewed_participant_index = 0
+        mock_packet_1.track_length = 1
         mock_to_hash.return_value = mock_packet_1
 
         mock_packet_2 = MagicMock(spec=TelemetryDataPacket)
@@ -962,6 +991,7 @@ class TestRaceData(unittest.TestCase):
 
         m = mock_open()
         with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.Track'), \
                 patch('racedata.RaceData.SectorTime') as mock_sector_time, \
                 patch('racedata.RaceData.open', m), \
                 patch('racedata.RaceData.os'), \
@@ -994,6 +1024,7 @@ class TestRaceData(unittest.TestCase):
         mock_packet_1.num_participants = 1
         mock_packet_1.participant_info = [mock_participant_info]
         mock_packet_1.viewed_participant_index = 0
+        mock_packet_1.track_length = 1
         mock_to_hash.return_value = mock_packet_1
 
         mock_packet_2 = MagicMock(spec=TelemetryDataPacket)
@@ -1014,6 +1045,7 @@ class TestRaceData(unittest.TestCase):
 
         m = mock_open()
         with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.Track'), \
                 patch('racedata.RaceData.SectorTime') as mock_sector_time, \
                 patch('racedata.RaceData.open', m), \
                 patch('racedata.RaceData.os'), \
@@ -1046,6 +1078,7 @@ class TestRaceData(unittest.TestCase):
         mock_packet_1.num_participants = 1
         mock_packet_1.participant_info = [mock_participant_info]
         mock_packet_1.viewed_participant_index = 0
+        mock_packet_1.track_length = 1
         mock_to_hash.return_value = mock_packet_1
 
         mock_packet_2 = MagicMock(spec=TelemetryDataPacket)
@@ -1066,6 +1099,7 @@ class TestRaceData(unittest.TestCase):
 
         m = mock_open()
         with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.Track'), \
                 patch('racedata.RaceData.SectorTime') as mock_sector_time, \
                 patch('racedata.RaceData.open', m), \
                 patch('racedata.RaceData.os'), \
@@ -1098,6 +1132,7 @@ class TestRaceData(unittest.TestCase):
         mock_packet_1.num_participants = 1
         mock_packet_1.participant_info = [mock_participant_info]
         mock_packet_1.viewed_participant_index = 0
+        mock_packet_1.track_length = 1
         mock_to_hash.return_value = mock_packet_1
 
         mock_packet_2 = MagicMock(spec=TelemetryDataPacket)
@@ -1118,6 +1153,7 @@ class TestRaceData(unittest.TestCase):
 
         m = mock_open()
         with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.Track'), \
                 patch('racedata.RaceData.SectorTime') as mock_sector_time, \
                 patch('racedata.RaceData.open', m), \
                 patch('racedata.RaceData.os'), \
@@ -1148,6 +1184,7 @@ class TestRaceData(unittest.TestCase):
         mock_packet_1.num_participants = 1
         mock_packet_1.participant_info = [mock_participant_info]
         mock_packet_1.viewed_participant_index = 0
+        mock_packet_1.track_length = 1
         mock_to_hash.return_value = mock_packet_1
 
         mock_packet_2 = MagicMock(spec=TelemetryDataPacket)
@@ -1167,6 +1204,7 @@ class TestRaceData(unittest.TestCase):
 
         m = mock_open()
         with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.Track'), \
                 patch('racedata.RaceData.open', m), \
                 patch('racedata.RaceData.os'), \
                 patch('racedata.RaceData.json.load'):
@@ -1197,6 +1235,7 @@ class TestRaceData(unittest.TestCase):
         mock_packet_1.num_participants = 1
         mock_packet_1.participant_info = [mock_participant_info]
         mock_packet_1.viewed_participant_index = 0
+        mock_packet_1.track_length = 1
         mock_to_hash.return_value = mock_packet_1
 
         mock_packet_2 = MagicMock(spec=TelemetryDataPacket)
@@ -1223,6 +1262,7 @@ class TestRaceData(unittest.TestCase):
 
         m = mock_open()
         with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.Track'), \
                 patch('racedata.RaceData.SectorTime') as mock_sector_time, \
                 patch('racedata.RaceData.open', m), \
                 patch('racedata.RaceData.os'), \
@@ -1256,6 +1296,7 @@ class TestRaceData(unittest.TestCase):
         mock_packet_1.num_participants = 2
         mock_packet_1.participant_info = [mock_participant_info]
         mock_packet_1.viewed_participant_index = 0
+        mock_packet_1.track_length = 1
         mock_to_hash.return_value = mock_packet_1
 
         mock_packet_2 = MagicMock(spec=TelemetryDataPacket)
@@ -1282,6 +1323,7 @@ class TestRaceData(unittest.TestCase):
 
         m = mock_open()
         with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.Track'), \
                 patch('racedata.RaceData.SectorTime') as mock_sector_time, \
                 patch('racedata.RaceData.open', m), \
                 patch('racedata.RaceData.os'), \
@@ -1296,6 +1338,7 @@ class TestRaceData(unittest.TestCase):
         self.assertIsInstance(instance.get_data(), expected_result)
 
     @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -1329,6 +1372,7 @@ class TestRaceData(unittest.TestCase):
         self.assertTrue(instance_1 == instance_2)
 
     @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -1362,6 +1406,7 @@ class TestRaceData(unittest.TestCase):
         self.assertFalse(instance_1 == instance_2)
 
     @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -1397,6 +1442,7 @@ class TestRaceData(unittest.TestCase):
         self.assertFalse(instance == self)
 
     @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -1430,6 +1476,7 @@ class TestRaceData(unittest.TestCase):
         self.assertTrue(instance_1 != instance_2)
 
     @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -1463,6 +1510,7 @@ class TestRaceData(unittest.TestCase):
         self.assertFalse(instance_1 != instance_2)
 
     @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -1498,6 +1546,7 @@ class TestRaceData(unittest.TestCase):
         self.assertTrue(instance != self)
 
     @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -1529,6 +1578,7 @@ class TestRaceData(unittest.TestCase):
         self.assertEqual(hash(instance), expected_value)
 
     @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -1566,6 +1616,7 @@ class TestRaceData(unittest.TestCase):
         self.assertEqual(repr(instance), expected_value)
 
     @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -1605,6 +1656,7 @@ class TestRaceData(unittest.TestCase):
         self.assertEqual(repr(instance), expected_value)
 
     @patch('racedata.RaceData.StartingGridEntry')
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -2675,3 +2727,321 @@ class TestTelemetryData(unittest.TestCase):
             self.assertIsInstance(next(instance), expected_result)
 
         m.assert_called_once_with(mock_packet, 'rb')
+
+
+class TestTrack(unittest.TestCase):
+    """Unit tests for Track class.
+
+    """
+    test_data = {
+        "Test Track With Pit": {
+            "display_name": "Test Track",
+            "length": 25,
+            "pit_entry": [
+                0,
+                0],
+            "pit_exit": [
+                100,
+                100],
+            "pit_radius": 2
+        },
+        "Test Track Without Pit": {
+            "display_name": "Test Track (No Pit)",
+            "length": 50
+        },
+        "A Horse With No Name": {
+            "length": 75
+        }
+    }
+
+    @patch('racedata.RaceData.json')
+    def test_init(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        expected_result = Track
+        self.assertIsInstance(instance, expected_result)
+
+    def test_init_file_missing(self):
+        m = mock_open()
+        with patch('racedata.RaceData.open', m) as mock_file_open:
+            mock_file_open.side_effect = FileNotFoundError
+            instance = Track(25)
+
+        self.assertFalse(instance._pit)
+
+    @patch('racedata.RaceData.json')
+    def test_init_bad_json(self, mock_json):
+        mock_json.load.side_effect = ValueError
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            with self.assertRaises(ValueError):
+                _ = Track(25)
+
+    @patch('racedata.RaceData.json')
+    def test_init_no_name(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(75)
+
+        expected_result = Track
+        self.assertIsInstance(instance, expected_result)
+
+    @patch('racedata.RaceData.json')
+    def test_init_no_pits(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(50)
+
+        expected_result = Track
+        self.assertIsInstance(instance, expected_result)
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_entry_x_exact_z_exact(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (0, sentinel.y, 0)
+        self.assertTrue(instance.at_pit_entry(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_entry_x_exact_z_near(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (0, sentinel.y, 1)
+        self.assertTrue(instance.at_pit_entry(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_entry_x_exact_z_limit(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (0, sentinel.y, 2)
+        self.assertFalse(instance.at_pit_entry(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_entry_x_exact_z_far(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (0, sentinel.y, 3)
+        self.assertFalse(instance.at_pit_entry(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_entry_x_near_z_exact(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (1, sentinel.y, 0)
+        self.assertTrue(instance.at_pit_entry(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_entry_x_limit_z_exact(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (2, sentinel.y, 0)
+        self.assertFalse(instance.at_pit_entry(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_entry_x_far_z_exact(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (3, sentinel.y, 0)
+        self.assertFalse(instance.at_pit_entry(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_entry_x_near_z_near(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (1, sentinel.y, 1)
+        self.assertTrue(instance.at_pit_entry(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_entry_x_limit_z_limit(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (2, sentinel.y, 2)
+        self.assertFalse(instance.at_pit_entry(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_entry_x_far_z_far(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (3, sentinel.y, 3)
+        self.assertFalse(instance.at_pit_entry(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_entry_no_pit(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(50)
+
+        coordinates = (0, sentinel.y, 0)
+        self.assertFalse(instance.at_pit_entry(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_exit_x_exact_z_exact(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (100, sentinel.y, 100)
+        self.assertTrue(instance.at_pit_exit(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_exit_x_exact_z_near(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (100, sentinel.y, 101)
+        self.assertTrue(instance.at_pit_exit(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_exit_x_exact_z_limit(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (100, sentinel.y, 102)
+        self.assertFalse(instance.at_pit_exit(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_exit_x_exact_z_far(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (100, sentinel.y, 103)
+        self.assertFalse(instance.at_pit_exit(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_exit_x_near_z_exact(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (101, sentinel.y, 100)
+        self.assertTrue(instance.at_pit_exit(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_exit_x_limit_z_exact(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (102, sentinel.y, 100)
+        self.assertFalse(instance.at_pit_exit(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_exit_x_far_z_exact(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (103, sentinel.y, 100)
+        self.assertFalse(instance.at_pit_exit(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_exit_x_near_z_near(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (101, sentinel.y, 101)
+        self.assertTrue(instance.at_pit_exit(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_exit_x_limit_z_limit(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (102, sentinel.y, 102)
+        self.assertFalse(instance.at_pit_exit(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_exit_x_far_z_far(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(25)
+
+        coordinates = (103, sentinel.y, 103)
+        self.assertFalse(instance.at_pit_exit(coordinates))
+
+    @patch('racedata.RaceData.json')
+    def test_method_at_pit_exit_no_pit(self, mock_json):
+        mock_json.load.return_value = self.test_data
+
+        m = mock_open()
+        with patch('racedata.RaceData.open', m):
+            instance = Track(50)
+
+        coordinates = (100, sentinel.y, 100)
+        self.assertFalse(instance.at_pit_exit(coordinates))

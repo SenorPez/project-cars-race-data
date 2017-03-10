@@ -71,6 +71,8 @@ class RaceData:
             self.laps_in_event, self.total_time = self._detect_race_length(
                 self._packet, telemetry_directory)
 
+            self._track = Track(self._packet.track_length)
+
             drivers_by_index = sorted(
                 [driver for driver in self._current_drivers.values()],
                 key=lambda x: x.index)
@@ -81,7 +83,6 @@ class RaceData:
                 for index, participant_info
                 in enumerate(self._packet.participant_info)
                 if index < self._packet.num_participants])
-            pass
 
     @property
     def best_lap(self):
@@ -756,3 +757,62 @@ class TelemetryData:
 
     def __next__(self):
         return next(self._telemetry_iterator)
+
+
+class Track:
+    """Represents a Project CARS track.
+
+    Notes
+        Track detection requires the existence of `lib/track_data.json` that
+        contains the track data.
+
+    Acknowledgements
+        Way too many thanks to mrbelowski, who made much of the data publicly
+        available through his CrewChief app, preventing me from having to
+        reinvent the wheel.
+        https://github.com/mrbelowski/CrewChiefV4/
+    """
+    def __init__(self, track_length):
+        try:
+            with open(os.path.join(
+                    os.path.dirname(__file__),
+                    'lib/track_data.json')) as track_json:
+                track_data = json.load(track_json)
+
+            track = sorted(
+                track_data.values(),
+                key=lambda x: abs(x['length'] - float(track_length)))[0]
+
+            try:
+                self._name = track['display_name']
+            except KeyError:
+                self._name = None
+
+            try:
+                # If all the pit keys are present, we populate the pit
+                # information
+                self._pit_entry = (
+                    float(track['pit_entry'][0]),
+                    float(track['pit_entry'][1]))
+                self._pit_exit = (
+                    float(track['pit_exit'][0]),
+                    float(track['pit_exit'][1]))
+                self._pit_radius = float(track['pit_radius'])
+            except KeyError:
+                self._pit = False
+            else:
+                self._pit = True
+        except FileNotFoundError:
+            self._pit = False
+        except ValueError as json_error:
+            raise json_error
+
+    def at_pit_entry(self, coordinates):
+        return self._pit \
+           and abs(self._pit_entry[0] - coordinates[0]) < self._pit_radius \
+           and abs(self._pit_entry[1] - coordinates[2]) < self._pit_radius
+
+    def at_pit_exit(self, coordinates):
+        return self._pit \
+            and abs(self._pit_exit[0]-coordinates[0]) < self._pit_radius \
+            and abs(self._pit_exit[1]-coordinates[2]) < self._pit_radius
