@@ -431,14 +431,16 @@ class RaceData:
                 raise ValueError("Participants not populated before break.")
             elif packet.packet_type == 1:
                 for index, name in enumerate(packet.name):
-                    drivers.append(Driver(index, name))
+                    if len(name):
+                        drivers.append(Driver(index, name))
             elif packet.packet_type == 2:
                 for index, name in enumerate(packet.name, packet.offset):
-                    drivers.append(Driver(index, name))
+                    if len(name):
+                        drivers.append(Driver(index, name))
 
         telemetry_data._telemetry_iterator = restore
 
-        return {driver.name: driver for driver in drivers[:count]}
+        return {driver.name: driver for driver in drivers}
 
     @staticmethod
     def _to_hash(telemetry_data, hash_value):
