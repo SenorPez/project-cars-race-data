@@ -86,6 +86,21 @@ class RaceData:
                 if index < self._packet.num_participants])
 
     @property
+    def all_driver_classification(self):
+        classification = list(self.classification)
+        for driver in self._dropped_drivers.values():
+            classification.append(ClassificationEntry(None, driver, None))
+
+        position = 0
+        for entry in sorted(
+                classification,
+                key=lambda x: (-x.driver.laps_complete, x.driver.race_time)):
+            position += 1
+            entry.race_position = position
+
+        return frozenset(classification)
+
+    @property
     def best_lap(self):
         try:
             return min([
@@ -463,22 +478,22 @@ class RaceData:
 
 class ClassificationEntry:
     def __init__(self, race_position, driver, viewed_driver):
-        self._race_position = race_position
-        self._driver = driver
+        self.race_position = race_position
+        self.driver = driver
         self._viewed_driver = viewed_driver
 
     def __repr__(self):
         return "ClassificationEntry(" \
-               "{s._race_position}, {driver_repr}, {s._viewed_driver})".format(
+               "{s.race_position}, {driver_repr}, {s._viewed_driver})".format(
                     s=self,
-                    driver_repr=repr(self._driver))
+                    driver_repr=repr(self.driver))
 
     def __str__(self):
         return "Classification Entry: " \
-               "{s._race_position} {driver_string} " \
+               "{s.race_position} {driver_string} " \
                "Viewed: {s._viewed_driver}".format(
                     s=self,
-                    driver_string=str(self._driver))
+                    driver_string=str(self.driver))
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -491,7 +506,7 @@ class ClassificationEntry:
         return NotImplemented
 
     def __hash__(self):
-        return hash((self._race_position, self._driver, self._viewed_driver))
+        return hash((self.race_position, self.driver, self._viewed_driver))
 
 
 class Driver:

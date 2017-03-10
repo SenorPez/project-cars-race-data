@@ -515,6 +515,53 @@ class TestRaceData(unittest.TestCase):
             with self.assertRaises(ValueError):
                 _ = RaceData(sentinel.directory)
 
+    @patch('racedata.RaceData.RaceData._detect_race_length')
+    @patch('racedata.RaceData.RaceData._get_drivers')
+    @patch('racedata.RaceData.RaceData._to_hash')
+    def test_property_all_driver_classification(
+            self,
+            mock_to_hash,
+            mock_get_drivers,
+            mock_detect_race_length):
+        from racedata.TelemetryDataPacket import ParticipantInfo
+        mock_participant_info = MagicMock(spec=ParticipantInfo)
+        mock_participant_info.race_position = 1
+
+        from racedata.TelemetryDataPacket import TelemetryDataPacket
+        mock_packet = MagicMock(spec=TelemetryDataPacket)
+        mock_packet.num_participants = 1
+        mock_packet.participant_info = [mock_participant_info]
+        mock_packet.viewed_participant_index = 0
+        mock_packet.track_length = 1
+        mock_to_hash.return_value = mock_packet
+
+        mock_driver = MagicMock(spec=Driver)
+        mock_driver.index = 0
+        mock_driver.laps_complete = 6
+        mock_driver.race_time = 42.0
+
+        mock_dropped_driver = MagicMock(spec=Driver)
+        mock_dropped_driver.laps_complete = 3
+        mock_dropped_driver.race_time = 11.0
+
+        mock_get_drivers.return_value = {'Kobernulf Monnur': mock_driver}
+
+        mock_detect_race_length.return_value = (10, None)
+
+        m = mock_open()
+        with patch('racedata.RaceData.TelemetryData'), \
+                patch('racedata.RaceData.Track'), \
+                patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.os'), \
+                patch('racedata.RaceData.json.load'):
+            instance = RaceData(sentinel.directory)
+
+        instance._dropped_drivers = {'Testy McTest': mock_dropped_driver}
+        expected_result = frozenset([
+            ClassificationEntry(1, mock_driver, True),
+            ClassificationEntry(2, mock_dropped_driver, None)])
+        self.assertSetEqual(instance.all_driver_classification, expected_result)
+
     @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.RaceData._get_drivers')
     @patch('racedata.RaceData.RaceData._to_hash')
@@ -711,7 +758,7 @@ class TestRaceData(unittest.TestCase):
                 patch('racedata.RaceData.json.load'):
             instance = RaceData(sentinel.directory)
 
-        expected_result = {ClassificationEntry(1, mock_driver, True)}
+        expected_result = frozenset([ClassificationEntry(1, mock_driver, True)])
         self.assertSetEqual(instance.classification, expected_result)
 
     @patch('racedata.RaceData.RaceData._detect_race_length')
@@ -1904,9 +1951,9 @@ class TestClassificationEntry(unittest.TestCase):
             False)
         expected_result = \
             "ClassificationEntry(" \
-            "{s._race_position}, {driver_repr}, {s._viewed_driver})".format(
+            "{s.race_position}, {driver_repr}, {s._viewed_driver})".format(
                 s=instance,
-                driver_repr=repr(instance._driver))
+                driver_repr=repr(instance.driver))
         self.assertEqual(repr(instance), expected_result)
 
     def test_magic_str(self):
@@ -1916,10 +1963,10 @@ class TestClassificationEntry(unittest.TestCase):
             False)
         expected_result = \
             "Classification Entry: " \
-            "{s._race_position} {driver_string} " \
+            "{s.race_position} {driver_string} " \
             "Viewed: {s._viewed_driver}".format(
                 s=instance,
-                driver_string=str(instance._driver))
+                driver_string=str(instance.driver))
         self.assertEqual(str(instance), expected_result)
 
     def test_magic_eq_true(self):
