@@ -64,6 +64,7 @@ class RaceData:
                 self._telemetry_data,
                 self._packet.num_participants)
             self._dropped_drivers = dict()
+            self._stopped_drivers = set()
 
             self._track = None
             self._elapsed_time = None
@@ -219,7 +220,8 @@ class RaceData:
             if participant_info.sector == 1:
                 sector = 3
             elif participant_info.sector == 2:
-                # STOP DETECTION
+                if driver_name in self._stopped_drivers:
+                    self._stopped_drivers.remove(driver_name)
                 sector = 1
             elif participant_info.sector == 3:
                 sector = 2
@@ -227,7 +229,15 @@ class RaceData:
                 # TODO: Investigate invalid sector number.
                 raise ValueError("Invalid Sector Number")
 
-            # Pit Entry / Exit
+            if self._track.at_pit_entry(participant_info.world_position) \
+                    and driver_name not in self._stopped_drivers \
+                    and self._packet.race_state == 2:
+                self._stopped_drivers.add(driver_name)
+
+            if self._track.at_pit_exit(participant_info.world_position) \
+                    and driver_name in self._stopped_drivers:
+                self._current_drivers[driver_name].stops += 1
+                self._stopped_drivers.remove(driver_name)
 
             sector_time = SectorTime(
                 participant_info.last_sector_time,
@@ -488,6 +498,7 @@ class Driver:
     def __init__(self, index, name):
         self.index = index
         self.name = name
+        self.stops = 0
 
         self._sector_times = list()
 
