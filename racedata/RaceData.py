@@ -59,6 +59,7 @@ class RaceData:
                 self._telemetry_data,
                 descriptor['race_start'])
             self._last_packet = None
+            self._final_packet_hash = descriptor['race_end']
 
             self._current_drivers = self._get_drivers(
                 self._telemetry_data,
@@ -188,6 +189,8 @@ class RaceData:
             self._packet = None
 
             try:
+                if hash(self._last_packet) == self._final_packet_hash:
+                    raise StopIteration
                 while self._packet is None or self._packet.packet_type != 0:
                     self._packet = next(self._telemetry_data)
             except StopIteration:
@@ -274,7 +277,14 @@ class RaceData:
         old_packet = None
         try:
             while True:
-                # Exhaust packets prior to RACE_FINISHED
+                # Exhaust packets prior to RACESTATE_RACING
+                while True:
+                    packet = next(telemetry_data)
+                    progress.update()
+                    if packet.packet_type == 0 and packet.race_state == 2:
+                        break
+
+                # Exhaust packets prior to RACESTATE_FINISHED
                 while True:
                     packet = next(telemetry_data)
                     progress.update()
@@ -284,14 +294,13 @@ class RaceData:
                 # Exhaust packets through RACE_FINISHED
                 while True:
                     try:
-                        if packet.packet_type == 0:
+                        if packet.packet_type == 0 and packet.race_state == 3:
                             old_packet = packet
                         packet = next(telemetry_data)
                         progress.update()
                         if packet.packet_type == 0 and packet.race_state != 3:
                             break
                     except StopIteration:
-                        old_packet = packet
                         break
 
         except StopIteration:
@@ -440,7 +449,7 @@ class RaceData:
 
         telemetry_data._telemetry_iterator = restore
 
-        return {driver.name: driver for driver in drivers}
+        return {driver.name: driver for driver in drivers[:count]}
 
     @staticmethod
     def _to_hash(telemetry_data, hash_value):
