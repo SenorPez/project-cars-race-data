@@ -37,10 +37,13 @@ class TestRaceData(unittest.TestCase):
 
         mock_tee.return_value = (iter([mock_participant_packet]), None)
 
-        mock_json.load.return_value = {'race_start': hash(mock_packet)}
+        mock_json.load.return_value = {
+            'race_start': hash(mock_packet),
+            'race_end': hash(mock_packet)}
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m):
+        with patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.RaceData._get_drivers'):
             instance = RaceData(sentinel.directory)
 
         expected_result = RaceData
@@ -80,10 +83,13 @@ class TestRaceData(unittest.TestCase):
 
         mock_tee.return_value = (iter([mock_participant_packet]), None)
 
-        mock_json.load.return_value = {'race_start': hash(mock_packet_1)}
+        mock_json.load.return_value = {
+            'race_start': hash(mock_packet_1),
+            'race_end': hash(mock_packet_2)}
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m):
+        with patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.RaceData._get_drivers'):
             instance = RaceData(sentinel.directory)
 
         expected_result = RaceData
@@ -160,7 +166,8 @@ class TestRaceData(unittest.TestCase):
         mock_tee.return_value = (iter([mock_participant_packet]), None)
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m):
+        with patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.RaceData._get_drivers'):
             m.side_effect = [FileNotFoundError, mock.DEFAULT]
             instance = RaceData(sentinel.directory)
 
@@ -245,7 +252,8 @@ class TestRaceData(unittest.TestCase):
         mock_tee.return_value = (iter([mock_participant_packet]), None)
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m):
+        with patch('racedata.RaceData.open', m),\
+                patch('racedata.RaceData.RaceData._get_drivers'):
             m.side_effect = [FileNotFoundError, mock.DEFAULT]
             instance = RaceData(sentinel.directory)
 
@@ -330,7 +338,8 @@ class TestRaceData(unittest.TestCase):
         mock_tee.return_value = (iter([mock_participant_packet]), None)
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m):
+        with patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.RaceData._get_drivers'):
             m.side_effect = [FileNotFoundError, mock.DEFAULT]
             instance = RaceData(sentinel.directory)
 
@@ -425,7 +434,8 @@ class TestRaceData(unittest.TestCase):
         mock_tee.return_value = (iter([mock_participant_packet]), None)
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m):
+        with patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.RaceData._get_drivers'):
             m.side_effect = [FileNotFoundError, mock.DEFAULT]
             instance = RaceData(sentinel.directory)
 
@@ -456,18 +466,20 @@ class TestRaceData(unittest.TestCase):
 
         mock_participant_packet = MagicMock()
         mock_participant_packet.packet_type = 1
-        mock_participant_packet.name = [sentinel.name]
+        mock_participant_packet.name = ['Kobernulf Monnur']
 
         mock_additional_participant_packet = MagicMock()
         mock_additional_participant_packet.packet_type = 2
-        mock_additional_participant_packet.name = [sentinel.additional_name]
+        mock_additional_participant_packet.name = ['Testy McTest']
         mock_additional_participant_packet.offset = 1
 
         mock_tee.return_value = (
             iter([mock_participant_packet, mock_additional_participant_packet]),
             None)
 
-        mock_json.load.return_value = {'race_start': hash(mock_packet)}
+        mock_json.load.return_value = {
+            'race_start': hash(mock_packet),
+            'race_end': hash(mock_packet)}
 
         m = mock_open()
         with patch('racedata.RaceData.open', m):
@@ -476,6 +488,7 @@ class TestRaceData(unittest.TestCase):
         expected_result = RaceData
         self.assertIsInstance(instance, expected_result)
 
+    @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.Driver')
     @patch('racedata.RaceData.os')
     @patch('racedata.RaceData.tee')
@@ -498,7 +511,7 @@ class TestRaceData(unittest.TestCase):
 
         mock_participant_packet = MagicMock()
         mock_participant_packet.packet_type = 1
-        mock_participant_packet.name = [sentinel.name]
+        mock_participant_packet.name = ['Kobernulf Monnur']
 
         mock_killer_packet = MagicMock()
         mock_killer_packet.packet_type = 0
@@ -508,7 +521,9 @@ class TestRaceData(unittest.TestCase):
             iter([mock_participant_packet, mock_killer_packet]),
             None)
 
-        mock_json.load.return_value = {'race_start': hash(mock_packet)}
+        mock_json.load.return_value = {
+            'race_start': hash(mock_packet),
+            'race_end': hash(mock_packet)}
 
         m = mock_open()
         with patch('racedata.RaceData.open', m):
@@ -988,10 +1003,14 @@ class TestRaceData(unittest.TestCase):
 
         mock_tee.return_value = (iter([mock_participant_packet]), None)
 
-        mock_json.load.return_value = {'race_start': hash(mock_packet)}
+        mock_json.load.return_value = {
+            'race_start': hash(mock_packet),
+            'race_end': hash(mock_packet)}
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m):
+        with patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.RaceData._get_drivers') as mock_get_drivers:
+            mock_get_drivers.return_value = {'Kobernulf Monnur': MagicMock()}
             instance = RaceData(sentinel.directory)
 
         expected_result = frozenset
@@ -1301,6 +1320,72 @@ class TestRaceData(unittest.TestCase):
     @patch('racedata.RaceData.RaceData._detect_race_length')
     @patch('racedata.RaceData.RaceData._get_drivers')
     @patch('racedata.RaceData.RaceData._to_hash')
+    def test_method_get_data_end_race_packet(
+            self,
+            mock_to_hash,
+            mock_get_drivers,
+            mock_detect_race_length):
+        from racedata.TelemetryDataPacket import ParticipantInfo
+        mock_participant_info = MagicMock(spec=ParticipantInfo)
+        mock_participant_info.race_position = 1
+        mock_participant_info.sector = 1
+        mock_participant_info.last_sector_time = 42.0
+        mock_participant_info.lap_invalidated = False
+
+        from racedata.TelemetryDataPacket import TelemetryDataPacket
+        mock_packet_1 = MagicMock(spec=TelemetryDataPacket, name='packet1')
+        mock_packet_1.num_participants = 1
+        mock_packet_1.participant_info = [mock_participant_info]
+        mock_packet_1.viewed_participant_index = 0
+        mock_packet_1.track_length = 1
+        mock_to_hash.return_value = mock_packet_1
+
+        mock_packet_2 = MagicMock(spec=TelemetryDataPacket)
+        mock_packet_2.packet_type = 0
+        mock_packet_2.num_participants = 1
+        mock_packet_2.participant_info = [mock_participant_info]
+        mock_packet_2.viewed_participant_index = 0
+        mock_packet_2.current_time = 0.1
+
+        mock_packet_3 = MagicMock(spec=TelemetryDataPacket)
+        mock_packet_3.packet_type = 0
+        mock_packet_3.num_participants = 1
+        mock_packet_3.participant_info = [mock_participant_info]
+        mock_packet_3.viewed_participant_index = 0
+        mock_packet_3.current_time = 0.1
+
+        mock_driver = MagicMock(spec=Driver)
+        mock_driver.index = 0
+        mock_driver.lap_times = list()
+        mock_driver.name = 'Kobernulf Monnur'
+
+        mock_get_drivers.return_value = {'Kobernulf Monnur': mock_driver}
+
+        mock_detect_race_length.return_value = (10, None)
+
+        m = mock_open()
+        with patch('racedata.RaceData.TelemetryData') as mock_telemetry_data, \
+                patch('racedata.RaceData.Track'), \
+                patch('racedata.RaceData.SectorTime') as mock_sector_time, \
+                patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.os'), \
+                patch('racedata.RaceData.json.load') as mock_json_load:
+            mock_json_load.return_value = {
+                'race_start': hash(mock_packet_1),
+                'race_end': hash(mock_packet_2)}
+            mock_telemetry_data.return_value.__next__.side_effect \
+                = [mock_packet_2, mock_packet_3]
+            mock_sector_time.return_value = 42.0
+            instance = RaceData(sentinel.directory)
+
+        _ = instance.get_data()
+
+        with self.assertRaises(StopIteration):
+            instance.get_data()
+
+    @patch('racedata.RaceData.RaceData._detect_race_length')
+    @patch('racedata.RaceData.RaceData._get_drivers')
+    @patch('racedata.RaceData.RaceData._to_hash')
     def test_method_get_data_invalid_sector(
             self,
             mock_to_hash,
@@ -1601,10 +1686,13 @@ class TestRaceData(unittest.TestCase):
             (iter([mock_participant_packet]), None),
             (iter([mock_participant_packet]), None)]
 
-        mock_json.load.return_value = {'race_start': hash(mock_packet)}
+        mock_json.load.return_value = {
+            'race_start': hash(mock_packet),
+            'race_end': hash(mock_packet)}
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m):
+        with patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.RaceData._get_drivers'):
             instance_1 = RaceData(sentinel.directory_1)
             instance_2 = RaceData(sentinel.directory_1)
 
@@ -1635,10 +1723,13 @@ class TestRaceData(unittest.TestCase):
             (iter([mock_participant_packet]), None),
             (iter([mock_participant_packet]), None)]
 
-        mock_json.load.return_value = {'race_start': hash(mock_packet)}
+        mock_json.load.return_value = {
+            'race_start': hash(mock_packet),
+            'race_end': hash(mock_packet)}
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m):
+        with patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.RaceData._get_drivers'):
             instance_1 = RaceData(sentinel.directory_1)
             instance_2 = RaceData(sentinel.directory_2)
 
@@ -1672,10 +1763,13 @@ class TestRaceData(unittest.TestCase):
 
         mock_tee.return_value = (iter([mock_participant_packet]), None)
 
-        mock_json.load.return_value = {'race_start': hash(mock_packet)}
+        mock_json.load.return_value = {
+            'race_start': hash(mock_packet),
+            'race_end': hash(mock_packet)}
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m):
+        with patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.RaceData._get_drivers'):
             instance = RaceData(sentinel.directory)
 
         self.assertFalse(instance == self)
@@ -1705,10 +1799,13 @@ class TestRaceData(unittest.TestCase):
             (iter([mock_participant_packet]), None),
             (iter([mock_participant_packet]), None)]
 
-        mock_json.load.return_value = {'race_start': hash(mock_packet)}
+        mock_json.load.return_value = {
+            'race_start': hash(mock_packet),
+            'race_end': hash(mock_packet)}
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m):
+        with patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.RaceData._get_drivers'):
             instance_1 = RaceData(sentinel.directory_1)
             instance_2 = RaceData(sentinel.directory_2)
 
@@ -1739,10 +1836,13 @@ class TestRaceData(unittest.TestCase):
             (iter([mock_participant_packet]), None),
             (iter([mock_participant_packet]), None)]
 
-        mock_json.load.return_value = {'race_start': hash(mock_packet)}
+        mock_json.load.return_value = {
+            'race_start': hash(mock_packet),
+            'race_end': hash(mock_packet)}
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m):
+        with patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.RaceData._get_drivers'):
             instance_1 = RaceData(sentinel.directory_1)
             instance_2 = RaceData(sentinel.directory_1)
 
@@ -1776,10 +1876,13 @@ class TestRaceData(unittest.TestCase):
 
         mock_tee.return_value = (iter([mock_participant_packet]), None)
 
-        mock_json.load.return_value = {'race_start': hash(mock_packet)}
+        mock_json.load.return_value = {
+            'race_start': hash(mock_packet),
+            'race_end': hash(mock_packet)}
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m):
+        with patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.RaceData._get_drivers'):
             instance = RaceData(sentinel.directory)
 
         self.assertTrue(instance != self)
@@ -1807,10 +1910,13 @@ class TestRaceData(unittest.TestCase):
 
         mock_tee.return_value = (iter([mock_participant_packet]), None)
 
-        mock_json.load.return_value = {'race_start': hash(mock_packet)}
+        mock_json.load.return_value = {
+            'race_start': hash(mock_packet),
+            'race_end': hash(mock_packet)}
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m):
+        with patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.RaceData._get_drivers'):
             instance = RaceData(sentinel.directory)
 
         expected_value = hash(sentinel.directory)
@@ -1844,10 +1950,13 @@ class TestRaceData(unittest.TestCase):
 
         mock_tee.return_value = (iter([mock_participant_packet]), None)
 
-        mock_json.load.return_value = {'race_start': hash(mock_packet)}
+        mock_json.load.return_value = {
+            'race_start': hash(mock_packet),
+            'race_end': hash(mock_packet)}
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m):
+        with patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.RaceData._get_drivers'):
             instance = RaceData(sentinel.directory)
 
         expected_value = "RaceData(\"sentinel.directory\", " \
@@ -1882,10 +1991,13 @@ class TestRaceData(unittest.TestCase):
 
         mock_tee.return_value = (iter([mock_participant_packet]), None)
 
-        mock_json.load.return_value = {'race_start': hash(mock_packet)}
+        mock_json.load.return_value = {
+            'race_start': hash(mock_packet),
+            'race_end': hash(mock_packet)}
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m):
+        with patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.RaceData._get_drivers'):
             instance = RaceData(
                 sentinel.directory,
                 descriptor_filename="custom.json")
@@ -1922,10 +2034,13 @@ class TestRaceData(unittest.TestCase):
 
         mock_tee.return_value = (iter([mock_participant_packet]), None)
 
-        mock_json.load.return_value = {'race_start': hash(mock_packet)}
+        mock_json.load.return_value = {
+            'race_start': hash(mock_packet),
+            'race_end': hash(mock_packet)}
 
         m = mock_open()
-        with patch('racedata.RaceData.open', m):
+        with patch('racedata.RaceData.open', m), \
+                patch('racedata.RaceData.RaceData._get_drivers'):
             instance = RaceData(sentinel.directory)
 
         expected_value = "Race Data for sentinel.directory"
