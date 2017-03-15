@@ -572,10 +572,10 @@ class TestRaceData(unittest.TestCase):
             instance = RaceData(sentinel.directory)
 
         instance._dropped_drivers = {'Testy McTest': mock_dropped_driver}
-        expected_result = frozenset([
+        expected_result = sorted([
             ClassificationEntry(1, mock_driver, True),
             ClassificationEntry(2, mock_dropped_driver, None)])
-        self.assertSetEqual(instance.all_driver_classification, expected_result)
+        self.assertListEqual(instance.all_driver_classification, expected_result)
 
     @patch('racedata.RaceData.Track')
     @patch('racedata.RaceData.RaceData._get_drivers')
@@ -773,8 +773,8 @@ class TestRaceData(unittest.TestCase):
                 patch('racedata.RaceData.json.load'):
             instance = RaceData(sentinel.directory)
 
-        expected_result = frozenset([ClassificationEntry(1, mock_driver, True)])
-        self.assertSetEqual(instance.classification, expected_result)
+        expected_result = sorted([ClassificationEntry(1, mock_driver, True)])
+        self.assertListEqual(instance.classification, expected_result)
 
     @patch('racedata.RaceData.RaceData._detect_race_length')
     @patch('racedata.RaceData.RaceData._get_drivers')
@@ -1013,7 +1013,7 @@ class TestRaceData(unittest.TestCase):
             mock_get_drivers.return_value = {'Kobernulf Monnur': MagicMock()}
             instance = RaceData(sentinel.directory)
 
-        expected_result = frozenset
+        expected_result = list
         self.assertIsInstance(instance._starting_grid, expected_result)
 
     @patch('racedata.RaceData.RaceData._detect_race_length')
@@ -2084,6 +2084,36 @@ class TestClassificationEntry(unittest.TestCase):
                 driver_string=str(instance.driver))
         self.assertEqual(str(instance), expected_result)
 
+    def test_magic_lt_true(self):
+        instance_1 = ClassificationEntry(1, sentinel.driver, False)
+        instance_2 = ClassificationEntry(2, sentinel.driver, False)
+        self.assertTrue(instance_1 < instance_2)
+
+    def test_magic_lt_false(self):
+        instance_1 = ClassificationEntry(1, sentinel.driver, False)
+        instance_2 = ClassificationEntry(1, sentinel.driver, False)
+        self.assertFalse(instance_1 < instance_2)
+
+    def test_magic_lt_diff_class(self):
+        instance = ClassificationEntry(1, sentinel.driver, False)
+        with self.assertRaises(TypeError):
+           _ = instance < self
+
+    def test_magic_le_true(self):
+        instance_1 = ClassificationEntry(1, sentinel.driver, False)
+        instance_2 = ClassificationEntry(1, sentinel.driver, False)
+        self.assertTrue(instance_1 <= instance_2)
+
+    def test_magic_le_false(self):
+        instance_1 = ClassificationEntry(2, sentinel.driver, False)
+        instance_2 = ClassificationEntry(1, sentinel.driver, False)
+        self.assertFalse(instance_1 <= instance_2)
+
+    def test_magic_le_diff_class(self):
+        instance = ClassificationEntry(1, sentinel.driver, False)
+        with self.assertRaises(TypeError):
+           _ = instance <= self
+
     def test_magic_eq_true(self):
         instance_1 = ClassificationEntry(
             sentinel.race_position,
@@ -2141,6 +2171,36 @@ class TestClassificationEntry(unittest.TestCase):
             sentinel.driver,
             False)
         self.assertTrue(instance != self)
+
+    def test_magic_gt_true(self):
+        instance_1 = ClassificationEntry(2, sentinel.driver, False)
+        instance_2 = ClassificationEntry(1, sentinel.driver, False)
+        self.assertTrue(instance_1 > instance_2)
+
+    def test_magic_gt_false(self):
+        instance_1 = ClassificationEntry(1, sentinel.driver, False)
+        instance_2 = ClassificationEntry(1, sentinel.driver, False)
+        self.assertFalse(instance_1 > instance_2)
+
+    def test_magic_gt_diff_class(self):
+        instance = ClassificationEntry(1, sentinel.driver, False)
+        with self.assertRaises(TypeError):
+           _ = instance > self
+
+    def test_magic_ge_true(self):
+        instance_1 = ClassificationEntry(1, sentinel.driver, False)
+        instance_2 = ClassificationEntry(1, sentinel.driver, False)
+        self.assertTrue(instance_1 >= instance_2)
+
+    def test_magic_ge_false(self):
+        instance_1 = ClassificationEntry(1, sentinel.driver, False)
+        instance_2 = ClassificationEntry(2, sentinel.driver, False)
+        self.assertFalse(instance_1 >= instance_2)
+
+    def test_magic_ge_diff_class(self):
+        instance = ClassificationEntry(1, sentinel.driver, False)
+        with self.assertRaises(TypeError):
+           _ = instance >= self
 
     def test_magic_hash(self):
         instance = ClassificationEntry(
@@ -2895,6 +2955,36 @@ class TestStartingGridEntry(unittest.TestCase):
                 s=instance,
                 driver_string=str(instance._driver))
         self.assertEqual(str(instance), expected_result)
+        
+    def test_magic_lt_true(self):
+        instance_1 = StartingGridEntry(1, sentinel.driver)
+        instance_2 = StartingGridEntry(2, sentinel.driver)
+        self.assertTrue(instance_1 < instance_2)
+
+    def test_magic_lt_false(self):
+        instance_1 = StartingGridEntry(1, sentinel.driver)
+        instance_2 = StartingGridEntry(1, sentinel.driver)
+        self.assertFalse(instance_1 < instance_2)
+
+    def test_magic_lt_diff_class(self):
+        instance = StartingGridEntry(1, sentinel.driver)
+        with self.assertRaises(TypeError):
+           _ = instance < self
+
+    def test_magic_le_true(self):
+        instance_1 = StartingGridEntry(1, sentinel.driver)
+        instance_2 = StartingGridEntry(1, sentinel.driver)
+        self.assertTrue(instance_1 <= instance_2)
+
+    def test_magic_le_false(self):
+        instance_1 = StartingGridEntry(2, sentinel.driver)
+        instance_2 = StartingGridEntry(1, sentinel.driver)
+        self.assertFalse(instance_1 <= instance_2)
+
+    def test_magic_le_diff_class(self):
+        instance = StartingGridEntry(1, sentinel.driver)
+        with self.assertRaises(TypeError):
+           _ = instance <= self
 
     def test_magic_eq_true(self):
         instance_1 = StartingGridEntry(sentinel.race_position, sentinel.driver)
@@ -2927,6 +3017,36 @@ class TestStartingGridEntry(unittest.TestCase):
     def test_magic_ne_diff_class(self):
         instance = StartingGridEntry(sentinel.race_position, sentinel.driver)
         self.assertTrue(instance != self)
+        
+    def test_magic_gt_true(self):
+        instance_1 = StartingGridEntry(2, sentinel.driver)
+        instance_2 = StartingGridEntry(1, sentinel.driver)
+        self.assertTrue(instance_1 > instance_2)
+
+    def test_magic_gt_false(self):
+        instance_1 = StartingGridEntry(1, sentinel.driver)
+        instance_2 = StartingGridEntry(1, sentinel.driver)
+        self.assertFalse(instance_1 > instance_2)
+
+    def test_magic_gt_diff_class(self):
+        instance = StartingGridEntry(1, sentinel.driver)
+        with self.assertRaises(TypeError):
+           _ = instance > self
+
+    def test_magic_ge_true(self):
+        instance_1 = StartingGridEntry(1, sentinel.driver)
+        instance_2 = StartingGridEntry(1, sentinel.driver)
+        self.assertTrue(instance_1 >= instance_2)
+
+    def test_magic_ge_false(self):
+        instance_1 = StartingGridEntry(1, sentinel.driver)
+        instance_2 = StartingGridEntry(2, sentinel.driver)
+        self.assertFalse(instance_1 >= instance_2)
+
+    def test_magic_ge_diff_class(self):
+        instance = StartingGridEntry(1, sentinel.driver)
+        with self.assertRaises(TypeError):
+           _ = instance >= self
 
     def test_magic_hash(self):
         instance = StartingGridEntry(sentinel.race_position, sentinel.driver)

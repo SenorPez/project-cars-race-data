@@ -78,7 +78,7 @@ class RaceData:
             drivers_by_index = sorted(
                 [driver for driver in self._current_drivers.values()],
                 key=lambda x: x.index)
-            self._starting_grid = frozenset([
+            self._starting_grid = sorted([
                 StartingGridEntry(
                     participant_info.race_position,
                     drivers_by_index[index])
@@ -88,7 +88,7 @@ class RaceData:
 
     @property
     def all_driver_classification(self):
-        classification = list(self.classification)
+        classification = self.classification
         for driver in self._dropped_drivers.values():
             classification.append(ClassificationEntry(None, driver, None))
 
@@ -99,7 +99,7 @@ class RaceData:
             position += 1
             entry.race_position = position
 
-        return frozenset(classification)
+        return sorted(classification)
 
     @property
     def best_lap(self):
@@ -146,7 +146,7 @@ class RaceData:
         drivers_by_index = sorted(
             [driver for driver in self._current_drivers.values()],
             key=lambda x: x.index)
-        return frozenset([
+        return sorted([
             ClassificationEntry(
                 participant_info.race_position,
                 drivers_by_index[index],
@@ -511,6 +511,16 @@ class ClassificationEntry:
                     s=self,
                     driver_string=str(self.driver))
 
+    def __lt__(self, other):
+        if isinstance(other, self.__class__):
+            return self.race_position < other.race_position
+        return NotImplemented
+
+    def __le__(self, other):
+        if isinstance(other, self.__class__):
+            return self.race_position <= other.race_position
+        return NotImplemented
+
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return hash(self) == hash(other)
@@ -519,6 +529,16 @@ class ClassificationEntry:
     def __ne__(self, other):
         if isinstance(other, self.__class__):
             return not hash(self) == hash(other)
+        return NotImplemented
+
+    def __gt__(self, other):
+        if isinstance(other, self.__class__):
+            return self.race_position > other.race_position
+        return NotImplemented
+
+    def __ge__(self, other):
+        if isinstance(other, self.__class__):
+            return self.race_position >= other.race_position
         return NotImplemented
 
     def __hash__(self):
@@ -727,6 +747,16 @@ class StartingGridEntry:
             s=self,
             driver_string=str(self._driver))
 
+    def __lt__(self, other):
+        if isinstance(other, self.__class__):
+            return self._race_position < other._race_position
+        return NotImplemented
+
+    def __le__(self, other):
+        if isinstance(other, self.__class__):
+            return self._race_position <= other._race_position
+        return NotImplemented
+
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return hash(self) == hash(other)
@@ -735,6 +765,16 @@ class StartingGridEntry:
     def __ne__(self, other):
         if isinstance(other, self.__class__):
             return not hash(self) == hash(other)
+        return NotImplemented
+
+    def __gt__(self, other):
+        if isinstance(other, self.__class__):
+            return self._race_position > other._race_position
+        return NotImplemented
+
+    def __ge__(self, other):
+        if isinstance(other, self.__class__):
+            return self._race_position >= other._race_position
         return NotImplemented
 
     def __hash__(self):
