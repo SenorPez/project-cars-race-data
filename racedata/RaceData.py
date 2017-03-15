@@ -383,7 +383,12 @@ class RaceData:
                 descriptor['race_start'] = hash(packet)
                 break
             else:
-                packet = next(telemetry_data)
+                packet = None
+                while packet is None or packet.packet_type != 0:
+                    progress.update()
+                    packet = next(telemetry_data)
+
+        progress.close()
 
         with open(os.path.join(
                 os.path.realpath(telemetry_directory),
