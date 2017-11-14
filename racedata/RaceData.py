@@ -193,6 +193,11 @@ class RaceData:
                     raise StopIteration
                 while self._packet is None or self._packet.packet_type != 0:
                     self._packet = next(self._telemetry_data)
+
+                # It seems, occassionally, a garbage packet is thrown.
+                while self._packet.game_state == 2 and self._packet.race_state == 0:
+                    self._packet = next(self._telemetry_data)
+
             except StopIteration:
                 self._packet = self._last_packet
                 raise
@@ -275,6 +280,7 @@ class RaceData:
             unit='packets')
 
         old_packet = None
+        '''
         try:
             while True:
                 # Exhaust packets prior to RACESTATE_RACING
@@ -306,6 +312,38 @@ class RaceData:
         except StopIteration:
             progress.close()
             descriptor['race_end'] = hash(old_packet)
+        '''
+        try:
+            # Eventually, we'll get through all the packets.
+            while True:
+                # Exhaust packets prior to RACESTATE_RACING
+                while True:
+                    packet = next(telemetry_data)
+                    progress.update()
+                    if packet.packet_type == 0 and packet.session_state == 5 and packet.race_state == 2:
+                        break
+
+                # Exhaust packets until RACESTATE_FINISHED
+                while True:
+                    packet = next(telemetry_data)
+                    progress.update()
+                    if packet.packet_type == 0 and packet.session_state == 5 and packet.race_state == 3:
+                        old_packet = packet
+                        break
+
+                # Exhaust packets until no longer RACESTATE_FINISHED, updating "last good" packet each time.
+                while True:
+                    packet = next(telemetry_data)
+                    progress.update()
+                    if packet.packet_type == 0 and packet.session_state == 5 and packet.race_state == 3:
+                        old_packet = packet
+                    elif packet.packet_type == 0:
+                        break
+
+        except StopIteration:
+            progress.close
+            descriptor['race_end'] = hash(old_packet)
+
 
         telemetry_data = TelemetryData(telemetry_directory, reverse=True)
         progress = tqdm(
@@ -464,11 +502,16 @@ class RaceData:
             unit='packets')
 
         while True:
-            packet = next(telemetry_data)
-            progress.update()
-            if hash(packet) == hash_value:
+            try:
+                packet = next(telemetry_data)
+            except StopIteration:
                 progress.close()
-                return packet
+                raise
+            else:
+                progress.update()
+                if hash(packet) == hash_value:
+                    progress.close()
+                    return packet
 
     def __repr__(self):
         return "RaceData(\"{}\", descriptor_filename=\"{}\")".format(
